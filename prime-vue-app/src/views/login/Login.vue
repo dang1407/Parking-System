@@ -6,12 +6,14 @@
       class="flex lg:w-[100%] lg:h-[100%] lg:pt-8 2xl:pt-0 min-h-[100%] bg-white rounded-xl shadow-getcssscan-1"
     >
       <!-- Left section -->
-      <div class="hidden 2xl:flex 2xl:w-[50%] h-[100%] items-center">
+      <div
+        class="hidden xl:flex xl:w-[60%] 2xl:w-[50%] h-[100%] items-center justify-center"
+      >
         <!-- <h1 class="text-primary-500 font-semibold text-center text-[24px] mb-8">
           MD Manament System
         </h1> -->
         <img
-          class="max-w-[100%] max-h-[100%]"
+          class="max-w-[100%] max-h-[100%] rounded-xl"
           src="../../assets/imgs/login-image.png"
           alt=""
         />
@@ -19,7 +21,7 @@
 
       <!-- Login Section -->
       <div
-        class="login-form sm:px-12 px-4 xs:min-h-[100%] w-[100%] 2xl:w-[50%] flex items-center justify-center"
+        class="login-form sm:px-12 px-4 xs:min-h-[100%] w-[100%] xl:w-[40%] 2xl:w-[50%] flex items-center justify-center"
       >
         <div class="w-[100%] sm:min-h-[100%] flex flex-col justify-center">
           <div class="logo-box flex justify-center">

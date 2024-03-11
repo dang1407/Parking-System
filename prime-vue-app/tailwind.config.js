@@ -29,9 +29,13 @@ module.exports = {
         "surface-800": "rgb(var(--surface-800))",
         "surface-900": "rgb(var(--surface-900))",
         "surface-950": "rgb(var(--surface-950))",
+        required: "red",
       },
       boxShadow: {
         "getcssscan-1": "rgba(100, 100, 111, 0.2) 0px 0px 29px 6px",
+      },
+      spacing: {
+        "basic-input": "36px",
       },
     },
     screens: {

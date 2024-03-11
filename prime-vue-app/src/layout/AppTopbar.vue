@@ -12,6 +12,13 @@
     </button>
 
     <div class="layout-topbar-menu">
+      <div>
+        <Dropdown
+          :options="languageDictionary"
+          v-model="helperStore.language"
+          @change="onChangeLanguage"
+        ></Dropdown>
+      </div>
       <button
         tabindex="0"
         class="p-link layout-topbar-button"
@@ -33,8 +40,31 @@
 </template>
 
 <script setup>
+import { ref, computed } from "vue";
+import { useHelperStore } from "@/stores/HelperStore";
 import { useLayout } from "./composable/useLayout";
+import { usePrimeVue } from "primevue/config";
+import Dropdown from "primevue/dropdown";
+import { locales } from "@/constants/locale";
 const { onMenuToggle } = useLayout();
+const primevue = usePrimeVue();
+const helperStore = useHelperStore();
+const languageDictionary = helperStore.languageDictionary;
+const localesLanguage = computed(() => {
+  return locales[helperStore.language];
+});
+
+/**
+ * Hàm chuyển đổi locale của primevue khi thay đổi ngôn ngữ
+ * Created by: nkmdang 11/03/2024
+ */
+function onChangeLanguage() {
+  primevue.config.locale = {
+    ...primevue.config.locale,
+    ...localesLanguage.value,
+  };
+  console.log(primevue.config.locale);
+}
 </script>
 
 <style lang="scss" scoped></style>

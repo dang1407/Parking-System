@@ -1,4 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useUserStore } from "@/stores/UserStore";
+// // Auth Guards
+const requireAuth = async (to, from, next) => {
+  const userStore = useUserStore();
+  await userStore.reloginAsync();
+  if (!userStore.isLogined) {
+    next({ name: "Login", params: {} });
+  } else {
+    next();
+  }
+};
+
 const routes = [
   {
     name: "Home",
@@ -9,14 +21,14 @@ const routes = [
       {
         name: "Dash Board",
         path: "/",
-        component: () => import("@/views/dashboard/Dashboard.vue"),
+        component: () => import("@/views/dashboard/DashBoard.vue"),
       },
       {
         name: "Employee Page",
         path: "/employee",
         component: () =>
           import(
-            /* webPackChunkName: "employee" */ "@/views/employee/Employee.vue"
+            /* webPackChunkName: "employee" */ "@/views/employee/EmployeePage.vue"
           ),
       },
       {
@@ -26,6 +38,9 @@ const routes = [
           import(/* webPackChunkName: "garage" */ "@/views/garage/Garage.vue"),
       },
     ],
+    beforeEnter: (to, from, next) => {
+      requireAuth(to, from, next);
+    },
   },
   {
     name: "Login",

@@ -97,4 +97,17 @@ function caculatePrice(dateString1, dateString2, vehicle, ticketType) {
 //   caculatePrice("2024-01-23T13:07:32+07:00", "2024-01-23T17:06:15.970", 0, null)
 // );
 
-console.log("2" > 0);
+const obj1 = {
+  name: "Minh Đăng",
+};
+
+const obj2 = {
+  name: "Minh Đăng 2",
+};
+
+const obj3 = {
+  ...obj1,
+  ...obj2,
+};
+
+console.log(obj3);

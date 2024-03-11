@@ -15,6 +15,9 @@ import router from "@/router";
 import { createPinia } from "pinia";
 //in main.js
 
+// Locale for Primevue
+import { useHelperStore } from "./stores/HelperStore";
+import { locales } from "@/constants/locale";
 const app = createApp(App);
 // const pinia = ;
 app.use(createPinia());
@@ -27,6 +30,7 @@ app.directive("badge", BadgeDirective);
 app.use(PrimeVue, {
   unstyled: true,
   pt: Lara, //apply preset
+  // locale: { ...PrimeVue },
 });
 
 app.config.errorHandler = (err, vm, info) => {

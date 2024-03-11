@@ -6,7 +6,7 @@ export const useUserStore = defineStore("userStore", {
   state: () => ({
     isShowProgress: false,
     isLogined: false,
-    accessToken: "",
+    accessToken: localStorage.getItem("accessToken"),
     role: "",
     loginData: {
       UserName: "",
@@ -16,6 +16,27 @@ export const useUserStore = defineStore("userStore", {
   getters: {},
   actions: {
     async loginAsync() {
+      await reloginAsync();
+      try {
+        this.isShowProgress = true;
+
+        const response = await axios.post("Authenticate/login", this.loginData);
+        this.isLogined = true;
+        this.accessToken = response.data.AccessToken;
+        localStorage.setItem("accessToken", response.data.AccessToken);
+        this.role = response.data.Role;
+        this.isShowProgress = false;
+      } catch (error) {
+        this.isShowProgress = false;
+        console.log(error);
+      }
+    },
+
+    /**
+     * Hàm đăng nhập lại khi người dùng vào lại trang web
+     * @returns
+     */
+    async reloginAsync() {
       try {
         if (localStorage.getItem("accessToken")) {
           this.isShowProgress = true;
@@ -35,20 +56,6 @@ export const useUserStore = defineStore("userStore", {
         }
       } catch (error) {
         this.isShowProgress = false;
-      }
-
-      try {
-        this.isShowProgress = true;
-
-        const response = await axios.post("Authenticate/login", this.loginData);
-        this.isLogined = true;
-        this.accessToken = response.data.AccessToken;
-        localStorage.setItem("accessToken", response.data.AccessToken);
-        this.role = response.data.Role;
-        this.isShowProgress = false;
-      } catch (error) {
-        this.isShowProgress = false;
-        console.log(error);
       }
     },
 

@@ -1,8 +1,8 @@
 .layout-sidebar {
   position: fixed;
-  width: 300px;
+  width: $sideBarWidth;
   height: calc(100vh - 9rem);
-  z-index: 999;
+  z-index: 9;
   overflow-y: auto;
   // -wekit-user-select: none;
   user-select: none;
@@ -25,7 +25,7 @@
           font-size: 0.857rem;
           text-transform: uppercase;
           font-weight: 700;
-          color: var(--surface-900);
+          color: rgb(var(--surface-900));
           margin: 0.75rem 0;
       }
 
@@ -67,7 +67,7 @@
           align-items: center;
           position: relative;
           outline: 0 none;
-          color: var(--text-color);
+          color: rgb(var(--text-color));
           cursor: pointer;
           padding: 0.75rem 1rem;
           border-radius: $borderRadius;
@@ -85,11 +85,11 @@
 
           &.active-route {
               font-weight: 700;
-              color: var(--primary-color);
+              color: rgb(var(--primary-color));
           }
 
           &:hover {
-              background-color: var(--surface-hover);
+              background-color: rgb(var(--surface-hover));
           }
 
           &:focus {

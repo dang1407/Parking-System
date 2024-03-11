@@ -12,7 +12,7 @@ async function login(email, password, toast) {
   const { request } = useAxios();
   const data = await request(
     {
-      url: "/Authenticate/login",
+      url: "Authenticate/login",
       method: "post",
       data: {
         UserName: email,
@@ -23,6 +23,7 @@ async function login(email, password, toast) {
   );
   const userStore = useUserStore();
   userStore.accessToken = data.AccessToken;
+  localStorage.setItem("accessToken", data.AccessToken);
   userStore.role = data.Role;
   userStore.isLogined = true;
   console.log(data);

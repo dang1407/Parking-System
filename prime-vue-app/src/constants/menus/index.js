@@ -7,7 +7,11 @@ export const SIDEBAR_MENU_ITEMS = [
     label: "Manage",
     items: [
       { label: "Nhân viên", icon: "pi pi-fw pi-users", to: "/employee" },
-      { label: "Bãi đỗ xe", icon: "pi pi-fw pi-users", to: "/garage" },
+      {
+        label: "Bãi đỗ xe",
+        icon: "pi pi-fw pi-car",
+        to: "/garage",
+      },
     ],
   },
 ];

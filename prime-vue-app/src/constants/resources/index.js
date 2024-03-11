@@ -8,7 +8,7 @@ export const resources = {
       LoginSuccess: {
         severity: "success",
         summary: "Đăng nhập thành công",
-        detail: "Tự động chuyển sang trang chủ trong 3 giây.",
+        detail: "Tự động chuyển sang trang chủ.",
         life: 500,
       },
       NetworkError: {
