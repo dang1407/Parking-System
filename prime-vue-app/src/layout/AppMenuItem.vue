@@ -8,7 +8,7 @@
       <ul>
         <AppMenuItem
           v-for="(childItem, index) in item.items"
-          :key="index"
+          :key="childItem.label"
           :item="childItem"
         ></AppMenuItem>
       </ul>

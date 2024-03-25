@@ -27,7 +27,7 @@ i.pi.pi-click-icon:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100;
+  z-index: 101;
   background-color: rgba(0,0,0,0.3);
 }
 
@@ -38,7 +38,13 @@ i.pi.pi-click-icon:hover {
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 50%;
-  &:active {
+  &:hover {
     @include focused-inset();
+  }
+}
+
+.calendar-container {
+  input[role="combobox"] {
+    width: 100%;
   }
 }

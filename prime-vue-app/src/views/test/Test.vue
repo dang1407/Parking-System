@@ -1,12 +1,9 @@
 <template>
-  <div class="card flex justify-content-center">
-    <Calendar v-model="date" />
-  </div>
+  <Calendar v-model="date" format="dd"></Calendar>
 </template>
 
 <script setup>
 import Calendar from "primevue/calendar";
 import { ref } from "vue";
-
-const date = ref("14/07/2002");
+const date = ref();
 </script>

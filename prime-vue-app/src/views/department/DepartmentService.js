@@ -3,7 +3,7 @@ import { useConvert } from "@/hooks/useConvert";
 import { ref, computed } from "vue";
 import { DepartmentAPI } from "../department/DepartmentAPI";
 import { useValidate } from "@/hooks/useValidate";
-import { employeeConstants } from "./EmployeeConstants";
+import { departmentConstants } from "./DepartmentConstants";
 import { useHelperStore } from "@/stores/HelperStore";
 import { mergeWith } from "lodash-es";
 import { data } from "autoprefixer";
@@ -16,52 +16,19 @@ const {
   getCurrentTimeString,
 } = useConvert();
 const { getDepartmentDataAsync } = DepartmentAPI();
-const isGettingEmployeeData = ref(false);
+const isGettingDepartmentData = ref(false);
 // Thông tin sẽ hiển thị lên bảng
 const tableInf = [
   {
-    field: "EmployeeCode",
-    tdStyle: "w-[150px] sm:min-w-40",
-  },
-  {
-    field: "FullName",
-    tdStyle: "w-[200px] sm:min-w-56",
-  },
-  {
-    field: "DateOfBirth",
-    tdStyle: "w-[120px] sm:min-w-32",
-    headerStyle: "min-width: 120px;",
-  },
-  {
-    field: "Gender",
-    tdStyle: "w-[200px] sm:min-w-56",
-  },
-  {
     field: "DepartmentName",
-    tdStyle: "w-[200px] sm:min-w-56",
-  },
-  {
-    field: "PositionName",
-    tdStyle: "w-[240px] sm:min-w-60",
-  },
-  {
-    field: "BankAccount",
-    tdStyle: "w-[200px] sm:min-w-56",
-  },
-  {
-    field: "BankName",
-    tdStyle: "w-[200px] sm:min-w-56",
-  },
-  {
-    field: "BankBranch",
-    tdStyle: "w-[200px] sm:min-w-56",
+    tdStyle: "w-[150px] sm:min-w-40",
   },
 ];
 
 const departmentOptions = ref();
 
 // Thông tin nhân viên sẽ gửi cho backend
-const employeeFormData = ref({});
+const departmentFormData = ref({});
 
 const formModeEnum = {
   Create: 1,
@@ -71,16 +38,16 @@ const formModeEnum = {
 const formMode = ref();
 
 // Thông tin nhân viên
-const employeeData = ref();
+const departmentData = ref();
 
 // Thông tin các nhân viên được chọn
-const employeeSelected = ref([]);
+const departmentSelected = ref([]);
 // Thông tin phân trang
-const employeePaging = ref({
+const departmentPaging = ref({
   totalRecords: 0,
   page: 1, // Đang xem trang thứ mấy
   pageSize: 20, // Bao nhiêu bản ghi trong trang
-  employeeSearchProperty: "", // Thông tin tìm kiếm nhân viên
+  departmentSearchProperty: "", // Thông tin tìm kiếm nhân viên
 });
 // Danh sách số bản ghi mỗi trang truyển thằng vào BackEndPaginator
 const numberRecordsPerPageOptions = [10, 20, 50, 100];
@@ -91,27 +58,27 @@ const formError = ref({});
 // Hiển thị paginator sau khi đã fetch API về thành công để phân trang không bị trống
 const paginatorPending = ref(false);
 // Thông tin trên bảng các nhân viên
-const employeeTableInf = computed(() => {
-  const newEmployeeTableInf = mergeWith(
+const departmentTableInf = computed(() => {
+  const newDepartmentTableInf = mergeWith(
     tableInf,
-    employeeConstants[helperStore.language.code]["tableHeader"]
+    departmentConstants[helperStore.language.code]["tableHeader"]
   );
-  // console.log(newEmployeeTableInf);
-  return newEmployeeTableInf;
+  // console.log(newDepartmentTableInf);
+  return newDepartmentTableInf;
 });
 
 // Form thông tin nhân viên
-const isShowEmployeeForm = ref(false);
-const employeeConstantsLanguage = computed(() => {
-  return employeeConstants[helperStore.language.code];
+const isShowDepartmentForm = ref(false);
+const departmentConstantsLanguage = computed(() => {
+  return departmentConstants[helperStore.language.code];
 });
 
 /**
  * Hàm bỏ chọn tất cả những nhân viên đã chọn
  * Created by: nkmdang 01/03/2024
  */
-function unSelectAllEmployee() {
-  employeeSelected.value = [];
+function unSelectAllDepartment() {
+  departmentSelected.value = [];
 }
 
 /**
@@ -119,9 +86,9 @@ function unSelectAllEmployee() {
  * do chưa lấy được tổng số bản ghi
  * Created by: nkmdang 06/01/2024
  */
-async function getEmployeeAsyncWitdhPending() {
+async function getDepartmentAsyncWitdhPending() {
   paginatorPending.value = false;
-  await getEmployeeAsync();
+  await getDepartmentAsync();
   paginatorPending.value = true;
 }
 
@@ -129,55 +96,55 @@ async function getEmployeeAsyncWitdhPending() {
  * Hàm mở Form thông tin nhân viên lên
  * Created by: nkmdang 11/03/2024
  */
-async function showEmployeeForm(mode, data) {
+async function showDepartmentForm(mode, data) {
   formMode.value = mode;
   if (mode == formModeEnum.Update) {
-    employeeFormData.value = {
+    departmentFormData.value = {
       ...data.data,
     };
-    // employeeFormData.value
+    // departmentFormData.value
   } else if (mode == formModeEnum.Create) {
-    const newEmployeeCode = await getNewEmployeeCode();
-    employeeFormData.value = {
-      EmployeeCode: newEmployeeCode,
+    const newDepartmentCode = await getNewDepartmentCode();
+    departmentFormData.value = {
+      DepartmentCode: newDepartmentCode,
     };
   }
-  isShowEmployeeForm.value = true;
-  // console.log(employeeFormData.value);
+  isShowDepartmentForm.value = true;
+  // console.log(departmentFormData.value);
 }
 
 /**
  * Hàm mở Form thông tin nhân viên lên
  * Created by: nkmdang 11/03/2024
  */
-function hideEmployeeForm() {
-  isShowEmployeeForm.value = false;
+function hideDepartmentForm() {
+  isShowDepartmentForm.value = false;
   formError.value = {};
 }
 /**
  * Hàm mở Dialog xác nhận thực hiện hành động của người dùng
  * Created by: nkmdang 12/03/2024
  */
-function showEmployeeFormConfirmDialog(confirm, toast, showDuplicateForm) {
-  // console.log(employeeFormData.value.EmployeeCode);
-  const dialogContent = employeeConstantsLanguage.value.confirmDialog;
+function showDepartmentFormConfirmDialog(confirm, toast, showDuplicateForm) {
+  // console.log(departmentFormData.value.DepartmentCode);
+  const dialogContent = departmentConstantsLanguage.value.confirmDialog;
   confirm.require({
     message: dialogContent.message[formMode.value](
-      employeeFormData.value.EmployeeCode
+      departmentFormData.value.DepartmentCode
     ),
-    header: employeeConstantsLanguage.value.confirmDialog.header,
+    header: departmentConstantsLanguage.value.confirmDialog.header,
     accept: async () => {
       // Tạo mới một nhân viên
       if (formMode.value === formModeEnum.Create) {
-        await createOneEmployeeAsync(toast, helperStore.languageCode);
+        await createOneDepartmentAsync(toast, helperStore.languageCode);
       } else if (formMode.value === formModeEnum.Update) {
-        await updateOneEmployeeAsync(toast, helperStore.languageCode);
+        await updateOneDepartmentAsync(toast, helperStore.languageCode);
       }
       if (showDuplicateForm) {
-        employeeFormData.value.EmployeeCode = await getNewEmployeeCode();
+        departmentFormData.value.DepartmentCode = await getNewDepartmentCode();
       } else {
         if (!formError.value) {
-          hideEmployeeForm();
+          hideDepartmentForm();
         }
       }
     },
@@ -192,17 +159,17 @@ function showEmployeeFormConfirmDialog(confirm, toast, showDuplicateForm) {
  * @param {Object (nhận từ DataTable)} data
  * Created by: nkmdang 11/03/2024
  */
-function confirmDeleteOneEmployee(confirm, toast, data) {
+function confirmDeleteOneDepartment(confirm, toast, data) {
   // console.log();
   confirm.require({
-    message: employeeConstantsLanguage.value.confirmDialog.message[3](
-      data.data.EmployeeCode
+    message: departmentConstantsLanguage.value.confirmDialog.message[3](
+      data.data.DepartmentCode
     ),
-    header: employeeConstantsLanguage.value.confirmDialog.header,
+    header: departmentConstantsLanguage.value.confirmDialog.header,
     rejectClass:
       "bg-white !text-primary-500 outline-[1px] outline-[solid] outline-primary-500",
     accept: async () => {
-      await deleteEmployeeByIdAsync(toast, data.data.EmployeeId);
+      await deleteDepartmentByIdAsync(toast, data.data.DepartmentId);
     },
     reject: () => {},
   });
@@ -212,13 +179,13 @@ function confirmDeleteOneEmployee(confirm, toast, data) {
  * Hàm lấy thông tin nhân viên từ Backend theo phân trang
  * Created by: nkmdang 01/03/2024
  */
-async function getEmployeeAsync() {
-  isGettingEmployeeData.value = true;
+async function getDepartmentAsync() {
+  isGettingDepartmentData.value = true;
   const response = await request({
-    url: `Employees?page=${employeePaging.value.page}&pageSize=${employeePaging.value.pageSize}&employeeProperty=${employeePaging.value.employeeSearchProperty}`,
+    url: `Departments?page=${departmentPaging.value.page}&pageSize=${departmentPaging.value.pageSize}&departmentProperty=${departmentPaging.value.departmentSearchProperty}`,
     method: "get",
   });
-  isGettingEmployeeData.value = false;
+  isGettingDepartmentData.value = false;
   // console.log(response);
   // Chuyển đổi định dạng ngày tháng trong db thành dd/mm/yyyy
   for (let i = 0; i < response.data.length; i++) {
@@ -229,9 +196,9 @@ async function getEmployeeAsync() {
       response.data[i].PICreatedDate
     );
   }
-  employeeData.value = response.data;
-  // console.log(employeeData.value);
-  employeePaging.value.totalRecords = response.countEmployees;
+  departmentData.value = response.data;
+  // console.log(departmentData.value);
+  departmentPaging.value.totalRecords = response.countDepartments;
 }
 
 /**
@@ -240,15 +207,15 @@ async function getEmployeeAsync() {
  * @param {String} languageCode
  * Created by: nkmdang 18/03/2024
  */
-async function createOneEmployeeAsync(toast, languageCode) {
+async function createOneDepartmentAsync(toast, languageCode) {
   try {
-    const data = convertEmployeeFormDataToFormData(formModeEnum.Create);
-    if (!validateEmployeeFormData(data)) {
+    const data = convertDepartmentFormDataToFormData(formModeEnum.Create);
+    if (!validateDepartmentFormData(data)) {
       return;
     }
     const response = await request(
       {
-        url: `Employees`,
+        url: `Departments`,
         method: "post",
         data,
         headers: {
@@ -257,9 +224,11 @@ async function createOneEmployeeAsync(toast, languageCode) {
       },
       toast
     );
-    await getEmployeeAsync();
-    const toastContent = employeeConstantsLanguage.value.Toast;
-    toast.add(toastContent.ActionEmployeeSuccess(toastContent[formMode.value]));
+    await getDepartmentAsync();
+    const toastContent = departmentConstantsLanguage.value.Toast;
+    toast.add(
+      toastContent.ActionDepartmentSuccess(toastContent[formMode.value])
+    );
   } catch (error) {
     console.log(error);
     if (error.response.status === 400) {
@@ -273,15 +242,15 @@ async function createOneEmployeeAsync(toast, languageCode) {
  * @param {} languageCode
  * Created by: nkmdang 18/03/2024
  */
-async function updateOneEmployeeAsync(toast, languageCode) {
+async function updateOneDepartmentAsync(toast, languageCode) {
   try {
-    const data = convertEmployeeFormDataToFormData(formModeEnum.Update);
-    if (!validateEmployeeFormData(data)) {
+    const data = convertDepartmentFormDataToFormData(formModeEnum.Update);
+    if (!validateDepartmentFormData(data)) {
       return;
     }
     const response = await request(
       {
-        url: `Employees/${employeeFormData.value.EmployeeId}`,
+        url: `Departments/${departmentFormData.value.DepartmentId}`,
         method: "put",
         data,
         headers: {
@@ -290,53 +259,58 @@ async function updateOneEmployeeAsync(toast, languageCode) {
       },
       toast
     );
-    await getEmployeeAsync();
-    const toastContent = employeeConstantsLanguage.value.Toast;
-    toast.add(toastContent.ActionEmployeeSuccess(toastContent[formMode.value]));
+    await getDepartmentAsync();
+    const toastContent = departmentConstantsLanguage.value.Toast;
+    toast.add(
+      toastContent.ActionDepartmentSuccess(toastContent[formMode.value])
+    );
   } catch (error) {
     console.log(error);
   }
 }
 /**
- * Hàm chuyển đổi employeeFormData từ Object sang FormData
+ * Hàm chuyển đổi departmentFormData từ Object sang FormData
  * @returns FormData
  * Created by: nkmdang 18/03/2024
  */
-function convertEmployeeFormDataToFormData(mode) {
+function convertDepartmentFormDataToFormData(mode) {
   const formData = new FormData();
-  for (let key in employeeFormData.value) {
-    formData.append(key, employeeFormData.value[key]);
+  for (let key in departmentFormData.value) {
+    formData.append(key, departmentFormData.value[key]);
   }
   if (mode === formModeEnum.Create) {
-    if (employeeFormData.value.DateOfBirth) {
-      console.log(employeeFormData.value.DateOfBirth);
+    if (departmentFormData.value.DateOfBirth) {
+      console.log(departmentFormData.value.DateOfBirth);
       formData.set(
         "DateOfBirth",
-        convertDatePrimeCalendarToDateDB(employeeFormData.value.DateOfBirth)
+        convertDatePrimeCalendarToDateDB(departmentFormData.value.DateOfBirth)
       );
     }
-    if (employeeData.value.PICreatedDate) {
+    if (departmentData.value.PICreatedDate) {
       formData.set(
         "PICreatedDate",
-        convertDatePrimeCalendarToDateDB(employeeFormData.value.PICreatedDate)
+        convertDatePrimeCalendarToDateDB(departmentFormData.value.PICreatedDate)
       );
     }
   } else if (mode === formModeEnum.Update) {
-    if (employeeFormData.value.DateOfBirth) {
+    if (departmentFormData.value.DateOfBirth) {
       formData.set(
         "DateOfBirth",
-        convertDateUIToDateDB(employeeFormData.value.DateOfBirth)
+        convertDateUIToDateDB(departmentFormData.value.DateOfBirth)
       );
     }
-    if (employeeFormData.value.PICreatedDate) {
+    if (departmentFormData.value.PICreatedDate) {
       formData.set(
         "PICreatedDate",
-        convertDateUIToDateDB(employeeFormData.value.PICreatedDate)
+        convertDateUIToDateDB(departmentFormData.value.PICreatedDate)
       );
     }
   }
   formData.set("ModifiedDate", getCurrentTimeString());
-  formData.set("DepartmentId", employeeFormData.value.Department?.DepartmentId);
+  formData.set(
+    "DepartmentId",
+    departmentFormData.value.Department?.DepartmentId
+  );
   return formData;
 }
 
@@ -344,7 +318,7 @@ function convertEmployeeFormDataToFormData(mode) {
  * Hàm validate các thông tin nhân viên
  * @returns Boolean
  */
-function validateEmployeeFormData(formData) {
+function validateDepartmentFormData(formData) {
   const errorObject = {};
   let isError = false;
   const {
@@ -354,8 +328,8 @@ function validateEmployeeFormData(formData) {
     validateWorkingAge,
     validateDateNotMoreThanTargetDate,
   } = useValidate();
-  const employeeFieldValidate = {
-    EmployeeCode: {
+  const departmentFieldValidate = {
+    DepartmentCode: {
       regex: /^NV-00[0-9]{4}$/,
       require: true,
     },
@@ -397,29 +371,35 @@ function validateEmployeeFormData(formData) {
     },
   };
 
-  for (let field in employeeFieldValidate) {
-    for (let key in employeeFieldValidate[field]) {
+  for (let field in departmentFieldValidate) {
+    for (let key in departmentFieldValidate[field]) {
       if (key == "maxLength") {
-        const errorMessageField = employeeFieldValidate[field].require
+        const errorMessageField = departmentFieldValidate[field].require
           ? "MaxLengthAndRequire"
           : "Length";
         errorObject[field] = validateCustomRequireAndMaxlength(
           formData.get(field),
-          employeeConstantsLanguage.value.formError[field + errorMessageField],
-          employeeFieldValidate[field].require
+          departmentConstantsLanguage.value.formError[
+            field + errorMessageField
+          ],
+          departmentFieldValidate[field].require
         );
       } else if (key == "regex") {
-        if (employeeFieldValidate[field].require) {
+        if (departmentFieldValidate[field].require) {
           errorObject[field] = validateByRegex(
             formData.get(field),
-            employeeConstantsLanguage.value.formError[field + "InvalidFormat"],
-            employeeFieldValidate[field].regex
+            departmentConstantsLanguage.value.formError[
+              field + "InvalidFormat"
+            ],
+            departmentFieldValidate[field].regex
           );
         } else if (formData.get(field)) {
           errorObject[field] = validateByRegex(
             formData.get(field),
-            employeeConstantsLanguage.value.formError[field + "InvalidFormat"],
-            employeeFieldValidate[field].regex
+            departmentConstantsLanguage.value.formError[
+              field + "InvalidFormat"
+            ],
+            departmentFieldValidate[field].regex
           );
         }
       }
@@ -428,14 +408,14 @@ function validateEmployeeFormData(formData) {
   const departmentId = formData.get("DepartmentId");
   if (departmentId == "undefined") {
     errorObject.Department =
-      employeeConstantsLanguage.value.formError.DepartmentEmty;
+      departmentConstantsLanguage.value.formError.DepartmentEmty;
   }
   const dateOfBirth = formData.get("DateOfBirth");
   if (formData.get("DateOfBirth") != "undefined") {
     const gender = formData.get("Gender") || 2;
     errorObject.DateOfBirth = validateWorkingAge(
       formData.get("DateOfBirth"),
-      employeeConstantsLanguage.value.formError.DateOfBirthGenderInvalid[
+      departmentConstantsLanguage.value.formError.DateOfBirthGenderInvalid[
         gender
       ],
       helperStore.workingStartAge,
@@ -446,7 +426,7 @@ function validateEmployeeFormData(formData) {
   if (formData.get("PICreatedDate") != "undefined") {
     errorObject.PICreatedDate = validateDateNotMoreThanTargetDate(
       formData.get("PICreatedDate"),
-      employeeConstantsLanguage.value.formError.PICreatedDateInfuture
+      departmentConstantsLanguage.value.formError.PICreatedDateInfuture
     );
   }
   console.log(errorObject);
@@ -460,22 +440,22 @@ function validateEmployeeFormData(formData) {
   return true;
 }
 
-function handleEmployeeFormDataError(error) {
+function handleDepartmentFormDataError(error) {
   if (error.response?.status === 400) {
   }
 }
 
 /**
  * Hàm xóa thông tin nhân viên theo Id
- * @param {Guid (String)} employeeId
+ * @param {Guid (String)} departmentId
  * @returns
  */
-async function deleteEmployeeByIdAsync(toast, employeeId) {
+async function deleteDepartmentByIdAsync(toast, departmentId) {
   const response = await request({
-    url: `Employees/${employeeId}`,
+    url: `Departments/${departmentId}`,
     method: "delete",
   });
-  await getEmployeeAsync();
+  await getDepartmentAsync();
   return response;
 }
 
@@ -484,9 +464,9 @@ async function deleteEmployeeByIdAsync(toast, employeeId) {
  * @returns Mã nhân viên mới
  * Created by: nkmdang 14/03/2024
  */
-async function getNewEmployeeCode() {
+async function getNewDepartmentCode() {
   const response = await request({
-    url: "Employees/NewEmployeeCode",
+    url: "Departments/NewDepartmentCode",
     method: "get",
   });
   return response;
@@ -496,16 +476,21 @@ async function getNewEmployeeCode() {
  * Hàm nhận file excel từ backend
  * @param {Int} page
  * @param {Int} pageSize
- * @param {String} employeeProperty
+ * @param {String} departmentProperty
  *
  * Created By: nkmdang 10/10/2023
  */
-async function exportExcelCurrentPage(page, pageSize, employeeProperty, aRef) {
-  // this.employeePropertyExcel = this.employeeProperty;
+async function exportExcelCurrentPage(
+  page,
+  pageSize,
+  departmentProperty,
+  aRef
+) {
+  // this.departmentPropertyExcel = this.departmentProperty;
   try {
     this.notificationStore.showLoading();
     const response = await axios.get(
-      `Employees/EmployeesExcel?page=${page}&pageSize=${pageSize}`,
+      `Departments/DepartmentsExcel?page=${page}&pageSize=${pageSize}`,
       {
         headers: {
           Authorization: `Bearer ${this.userStore.accessToken}`,
@@ -555,34 +540,34 @@ async function getDepartmentOptionsAsync() {
   });
 }
 
-export function EmployeeService() {
+export function DepartmentService() {
   return {
-    isGettingEmployeeData,
-    isShowEmployeeForm,
-    employeeData,
-    employeeSelected,
-    employeePaging,
-    employeeFormData,
+    isGettingDepartmentData,
+    isShowDepartmentForm,
+    departmentData,
+    departmentSelected,
+    departmentPaging,
+    departmentFormData,
     tableInf,
     numberRecordsPerPageOptions,
     departmentOptions,
     formMode,
     formModeEnum,
-    employeeTableInf,
-    employeeConstantsLanguage,
+    departmentTableInf,
+    departmentConstantsLanguage,
     paginatorPending,
     formError,
-    showEmployeeForm,
-    showEmployeeFormConfirmDialog,
-    hideEmployeeForm,
-    unSelectAllEmployee,
-    confirmDeleteOneEmployee,
-    getEmployeeAsyncWitdhPending,
-    getNewEmployeeCode,
-    getEmployeeAsync,
-    createOneEmployeeAsync,
-    updateOneEmployeeAsync,
-    deleteEmployeeByIdAsync,
+    showDepartmentForm,
+    showDepartmentFormConfirmDialog,
+    hideDepartmentForm,
+    unSelectAllDepartment,
+    confirmDeleteOneDepartment,
+    getDepartmentAsyncWitdhPending,
+    getNewDepartmentCode,
+    getDepartmentAsync,
+    createOneDepartmentAsync,
+    updateOneDepartmentAsync,
+    deleteDepartmentByIdAsync,
     getDepartmentOptionsAsync,
     exportExcelCurrentPage,
   };

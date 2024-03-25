@@ -12,11 +12,13 @@
     "axios": "^1.6.7",
     "dayjs": "^1.11.10",
     "dotenv": "^16.4.5",
+    "js-cookie": "^3.0.5",
     "lodash-es": "^4.17.21",
     "pinia": "^2.1.7",
     "primeicons": "^6.0.1",
     "primevue": "^3.49.1",
     "vue": "^3.4.18",
+    "vue-i18n": "9",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
@@ -28,6 +30,7 @@
     "prettier": "^2.7.1",
     "sass": "^1.71.1",
     "tailwindcss": "^3.4.1",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "vite-plugin-node-polyfills": "^0.21.0"
   }
 }

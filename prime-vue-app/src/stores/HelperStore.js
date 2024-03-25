@@ -1,16 +1,23 @@
 import { defineStore } from "pinia";
+import { ref, reactive } from "vue";
 export const useHelperStore = defineStore("helperStore", {
   state: () => ({
-    language: "VN",
-    languageDictionary: ["VN", "EN"],
+    language: {
+      label: "English",
+      code: "en",
+      languageLabel: "Language",
+    },
+    workingStartAge: 18,
+    workingEndAge: {
+      0: 60,
+      1: 65,
+      2: 65,
+    },
   }),
-  getters: {},
-  actions: {
-    setLanguage(language) {
-      if (this.languageDictionary.includes(language)) {
-        this.language = language;
-      } else
-        throw "Mã ngôn ngữ không có trong danh sách các ngôn ngữ trang web đang có!";
+  getters: {
+    languageCode: (state) => {
+      return state.language.code;
     },
   },
+  actions: {},
 });

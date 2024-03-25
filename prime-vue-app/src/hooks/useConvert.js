@@ -1,13 +1,15 @@
 import { useHelperStore } from "@/stores/HelperStore";
 import { genderLanguage } from "@/constants/gender";
-const language = useHelperStore().language;
+import dayjs from "dayjs";
+
+const language = useHelperStore().languageCode;
 /**
  * Chuyển đổi định dạng ngày từ DB yyyy-mm-dd sang dd/mm/yyyy để hiện thị ở datepicker
  * @param {String} dateDB Chuỗi nhận từ CSDL có dạng yyyy-mm-dd
  * @returns Ngày định dạng dd/mm/yyyy
  * Created by: nkmdang (03/10/2023)
  */
-function covertDateDBToUIText(dateDB, datePattern) {
+function convertDateDBToUIText(dateDB, datePattern) {
   if (!datePattern) {
     datePattern = "dd/MM/yyyy";
   }
@@ -25,12 +27,82 @@ function covertDateDBToUIText(dateDB, datePattern) {
     return "";
   }
 }
+/**
+ * Hàm chuyển đổi ngày tháng trên giao diện thành ngày tháng YYYY-MM-DD HH:mm:ss
+ * để gửi sang backend
+ * @param {Date} inputString
+ * @returns Date YYYY-MM-DD HH:mm:ss
+ * Created by: nkmdang 18/03/2024
+ */
+function convertDateUIToDateDB(inputString) {
+  // Phân tích chuỗi thời gian đầu vào
+  var parts = inputString.toString().split(/[\s/]+/);
+  let timePart = [];
+  // trong trường hợp người dùng ko chọn giờ phút thì cho bằng 00
+  if (parts[3]) {
+    timePart = parts[3].split(":");
+  } else {
+    timePart[0] = "00";
+    timePart[1] = "00";
+  }
+
+  return `${parts[2]}-${parts[1]}-${parts[0]}T${timePart[0]}:${timePart[1]}:00`;
+}
+
+function convertDatePrimeCalendarToDateDB(primeCalendarDate) {
+  const dateObj = new Date(Date.parse(primeCalendarDate));
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth() + 1; // Tháng bắt đầu từ 0
+  const day = dateObj.getDate();
+  const hours = dateObj.getHours();
+  const minutes = dateObj.getMinutes();
+  const seconds = dateObj.getSeconds();
+  return `${year}-${day.toString().padStart(2, "0")}-${month
+    .toString()
+    .padStart(2, "0")} ${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+}
 
 function convertGenderDBToUIText(gender) {
   // console.log(gender);
   return genderLanguage[language][gender];
 }
 
+function getCurrentTimeString() {
+  const now = dayjs();
+
+  const year = now.year();
+  let month = now.month() + 1;
+  if (month < 10) {
+    month = "0" + month;
+  }
+  let day = now.date();
+  if (day < 10) {
+    day = "0" + day;
+  }
+  let hours = now.hour();
+  if (hours < 10) {
+    hours = "0" + hours;
+  }
+  let minutes = now.minute();
+  if (minutes < 10) {
+    minutes = "0" + minutes;
+  }
+  let seconds = now.second();
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 export function useConvert() {
-  return { convertGenderDBToUIText, covertDateDBToUIText };
+  return {
+    convertGenderDBToUIText,
+    convertDateDBToUIText,
+    convertDateUIToDateDB,
+    convertDatePrimeCalendarToDateDB,
+    getCurrentTimeString,
+  };
 }

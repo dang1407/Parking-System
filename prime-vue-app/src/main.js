@@ -13,14 +13,18 @@ import Tooltip from "primevue/tooltip";
 import Ripple from "primevue/ripple";
 import router from "@/router";
 import { createPinia } from "pinia";
+import { createI18n } from "vue-i18n";
+
 //in main.js
 
 // Locale for Primevue
 import { useHelperStore } from "./stores/HelperStore";
 import { locales } from "@/constants/locale";
 const app = createApp(App);
-// const pinia = ;
+// use pinia
 app.use(createPinia());
+// use vue i18n
+app.use(createI18n());
 app.use(ConfirmationService);
 app.use(ToastService);
 app.use(DialogService);
@@ -30,7 +34,6 @@ app.directive("badge", BadgeDirective);
 app.use(PrimeVue, {
   unstyled: true,
   pt: Lara, //apply preset
-  // locale: { ...PrimeVue },
 });
 
 app.config.errorHandler = (err, vm, info) => {
@@ -38,15 +41,11 @@ app.config.errorHandler = (err, vm, info) => {
   // `info` is a Vue-specific error info, e.g. which lifecycle hook
   // the error was found in
   console.log(err + "\n" + info);
-  // console.log(vm);
-  // console.log(info);
 };
 
 app.config.warnHandler = function (msg, vm, trace) {
   // `trace` is the component hierarchy trace
   console.log(msg + "\n" + trace);
-  // console.log(vm);
-  // console.log(trace);
 };
 
 app.use(router);

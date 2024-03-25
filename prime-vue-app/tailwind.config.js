@@ -47,7 +47,8 @@ module.exports = {
 
       md: "768px",
       // => @media (min-width: 768px) { ... }
-
+      sidebar: "991px",
+      // => @media (min-width: 991px) { ... }
       lg: "1024px",
       // => @media (min-width: 1024px) { ... }
 

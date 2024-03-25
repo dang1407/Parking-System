@@ -1,10 +1,17 @@
 <template>
   <div class="w-[100%] h-[100%]">
     <div class="h-[36px] flex justify-between items-center">
-      <h1 class="font-semibold text-[24px]">Danh sách thông tin nhân viên</h1>
-      <Button class="h-[32px]" icon="pi pi-plus" label="Thêm mới"></Button>
+      <h1 class="font-semibold text-[1rem] sm:text-[1.5rem]">
+        {{ employeeConstantsLanguage.listOfEmployeeTitle }}
+      </h1>
+      <Button
+        @click="showEmployeeForm(formModeEnum.Create)"
+        class="h-[32px]"
+        icon="pi pi-plus"
+        :label="employeeConstantsLanguage.createButtonText"
+      ></Button>
     </div>
-    <div class="card w-[100%] relative">
+    <div class="card w-[100%] h-[100%] bg-white">
       <!-- Toolbar thực hiện hàng loạt + tìm kiếm + xuất file excel -->
       <Toolbar class="employee-toolbar h-[44px] mb-[4px]">
         <template #start>
@@ -13,18 +20,19 @@
             v-show="parseInt(employeeSelected.length) > 1"
           >
             <div class="font-semibold">
-              Đã chọn {{ employeeSelected.length }}
+              {{ employeeConstants[helperStore.languageCode].selected }}
+              {{ employeeSelected.length }}
             </div>
             <Button
               class="h-[36px]"
               @click="unSelectAllEmployee"
-              label="Bỏ chọn"
+              :label="employeeConstants[helperStore.languageCode].unselect"
               severity="info"
               outlined
             />
             <Button
               class="h-[36px]"
-              label="Xóa"
+              :label="employeeConstants[helperStore.languageCode].delete"
               icon="pi pi-trash"
               severity="danger"
               outlined
@@ -44,116 +52,131 @@
                   v-model="employeePaging.employeeSearchProperty"
                   placeholder="Search"
                   autofocus
+                  @keydown.enter="getEmployeeAsync"
                 />
               </IconField>
             </div>
+            <div @click="getEmployeeAsync">
+              <i class="text-2xl pi-click-icon pi pi-replay"></i>
+            </div>
             <div>
-              <i
-                v-tooltip.bottom="'Xuất file excel'"
-                class="text-2xl pi pi-file-export pi-click-icon"
-              ></i>
+              <a href="" class="invisible" ref="aRef"></a>
+              <div @click="(e) => showExportExcelOption(e)">
+                <i
+                  v-tooltip.bottom="
+                    employeeConstants[helperStore.languageCode]
+                      .exportExcelFileTooltip
+                  "
+                  class="text-2xl pi pi-file-export pi-click-icon"
+                ></i>
+              </div>
+              <div
+                class="fixed"
+                :style="{
+                  right: `${excelListBoxPosition.x}px`,
+                  top: `${excelListBoxPosition.y}px`,
+                }"
+              >
+                <div class="absolute">
+                  <Listbox></Listbox>
+                </div>
+              </div>
             </div>
           </div>
         </template>
       </Toolbar>
-
       <!-- Bảng hiển thị thông tin -->
-      <div class="table-container">
-        <DataTable
-          v-model:selection="employeeSelected"
-          :value="employeeData"
-          :show-gridlines="true"
-          :striped-rows="true"
-          :reorderableColumns="true"
-          :stickyHeader="true"
-          selection-mode="multiple"
-          :metaKeySelection="false"
-          @rowSelect="onRowSelect"
-          @rowUnselect="onRowUnselect"
-          dataKey="EmployeeId"
-          style="position: static !important"
-        >
-          <Column
-            selectionMode="multiple"
-            class="sticky left-0 text-center"
-            headerStyle="width: 3rem"
-          ></Column>
-          <div v-for="(columnData, index) in tableInf">
-            <Column
-              v-if="
-                columnData.field != 'Gender' &&
-                !columnData.field.includes('Date')
-              "
-              :key="index"
-              :field="columnData.field"
-              :header="columnData.header"
-              :style="columnData.columnStyle"
-            ></Column>
-            <Column
-              v-if="columnData.field == 'Gender'"
-              :header="columnData.header"
-              :field="columnData.field"
-              style="min-width: 100px"
-            >
-              <template #body="slotProps">
-                {{ convertGenderDBToUIText(slotProps.data[columnData.field]) }}
-              </template>
-            </Column>
-            <Column
-              v-if="columnData.field == 'DateOfBirth'"
-              :header="columnData.header"
-              :field="columnData.field"
-              style="min-width: 100px"
-            >
-              <template #body="slotProps">
-                {{ covertDateDBToUIText(slotProps.data[columnData.field]) }}
-              </template>
-            </Column>
-          </div>
-
-          <Column
-            class="sticky right-0 bg-inherit border-[1px] border-solid"
-            header="Chức năng"
+      <div class="table-container relative flex flex-col">
+        <div class="flex-1">
+          <DataTable
+            :loading="isGettingEmployeeData"
+            v-model:selection="employeeSelected"
+            :value="employeeData"
+            :show-gridlines="true"
+            :striped-rows="true"
+            :reorderableColumns="true"
+            selection-mode="multiple"
+            :metaKeySelection="false"
+            style="position: static !important"
           >
-            <template #body="data">
-              <div class="">
-                <!-- Danh sách dropdown các chức năng thêm: nhân bản, ... -->
-                <div class="">
-                  <!-- Nút sửa -->
-                  <SplitButton
-                    @click="showEmployeeForm"
-                    class="h-[32px]"
-                    label="Sửa"
-                    icon="pi pi-chevron-down"
-                    :model="[
-                      {
-                        label: 'Xóa',
-                        command: () => {
-                          // console.log(data.data.EmployeeId);
-                          confirmDeleteOneEmployee(confirm, toast, data);
-                        },
-                      },
-                      {
-                        label: 'Nhân bản',
-                      },
-                    ]"
-                  >
-                  </SplitButton>
-                </div>
+            <div>
+              <Column
+                selectionMode="multiple"
+                class="sticky left-0 text-center"
+                headerStyle="width: 3rem"
+              ></Column>
+              <div
+                v-for="(columnData, index) in employeeTableInf"
+                :key="columnData.field"
+              >
+                <Column
+                  v-if="columnData.field != 'Gender'"
+                  :key="index"
+                  :header="columnData.header"
+                  :columnStyle="columnData.headerStyle"
+                >
+                  <template #body="data">
+                    <div class="text-wrap" :class="columnData.tdStyle">
+                      {{ data.data[columnData.field] }}
+                    </div>
+                  </template>
+                </Column>
+                <Column
+                  v-if="columnData.field == 'Gender'"
+                  :field="columnData.field"
+                  :header="columnData.header"
+                  style="min-width: 100px"
+                >
+                  <template #body="slotProps">
+                    {{
+                      genderLanguage[helperStore.languageCode][
+                        slotProps.data[columnData.field]
+                      ]
+                    }}
+                  </template>
+                </Column>
               </div>
-            </template>
-          </Column>
-        </DataTable>
-        <!-- <Paginator
-          :total-records="employeePaging.totalRecords"
-          :rows="employeePaging.pageSize"
-          :rowsPerPageOptions="rowsPerPageOptions"
-        >
-          <template #start="slotProps">
-            <div>Tổng số bản ghi {{ employeePaging.totalRecords }}</div>
-          </template>
-          <template #NextPageLink="slotProps"><div>Hello</div></template>
-        </Paginator> -->
+              <Column
+                class="sticky right-0 bg-inherit border-[1px] border-solid"
+                :header="employeeConstantsLanguage.functionColumnHeader"
+              >
+                <template #body="data">
+                  <div class="">
+                    <!-- Danh sách dropdown các chức năng thêm: nhân bản, ... -->
+                    <div class="">
+                      <!-- Nút sửa -->
+                      <SplitButton
+                        @click="showEmployeeForm(formModeEnum.Update, data)"
+                        class="h-[32px]"
+                        :label="
+                          employeeConstants[helperStore.languageCode].update
+                        "
+                        icon="pi pi-chevron-down"
+                        :model="[
+                          {
+                            label:
+                              employeeConstants[helperStore.languageCode]
+                                .delete,
+                            command: () => {
+                              // console.log(data.data.EmployeeId);
+                              confirmDeleteOneEmployee(confirm, toast, data);
+                            },
+                          },
+                          {
+                            label:
+                              employeeConstants[helperStore.languageCode]
+                                .replication,
+                          },
+                        ]"
+                      >
+                      </SplitButton>
+                    </div>
+                  </div>
+                </template>
+              </Column>
+            </div>
+          </DataTable>
+        </div>
 
         <div
           class="sticky py-1 bottom-0 left-0 bg-white border-[1px] border-solid border-[#e0e0e0]"
@@ -170,26 +193,85 @@
           ></BackEndPaginator>
         </div>
       </div>
+      <!-- <div v-else class="h-[calc(100%-44px)] flex justify-center items-center">
+        <ProgressSpinner
+          class="z-[100]"
+          stroke-width="8"
+          animation-duration="0.3s"
+        ></ProgressSpinner>
+      </div> -->
     </div>
 
-    <div class="form-container" v-show="isShowEmployeeForm">
-      <div class="bg-white rounded-xl p-6">
-        <div class="flex items-center justify-between mb-2">
-          <h1 class="font-bold text-[20px]">{{ formHeading }}</h1>
+    <div class="form-container" v-if="isShowEmployeeForm">
+      <div class="form-box bg-white rounded-xl px-6">
+        <div
+          class="flex items-center justify-between mb-2 sticky top-0 left-0 pt-6 bg-white"
+        >
+          <h1 class="font-bold text-[20px]">
+            {{
+              formMode == formModeEnum.Create
+                ? employeeConstantsLanguage.formHeading.Create
+                : employeeConstantsLanguage.formHeading.Update
+            }}
+          </h1>
           <div class="form-close-button" @click="hideEmployeeForm">
             <i class="pi pi-times text-[18px]"></i>
           </div>
         </div>
         <EmployeeFormBody
           :departmentOptions="departmentOptions"
+          v-model:employeeCode="employeeFormData.EmployeeCode"
+          v-model:employeeFullName="employeeFormData.FullName"
+          v-model:gender="employeeFormData.Gender"
+          v-model:department="employeeFormData.DepartmentName"
+          v-model:positionName="employeeFormData.PositionName"
+          v-model:dateOfBirth="employeeFormData.DateOfBirth"
+          v-model:personalIdentification="
+            employeeFormData.PersonalIdentification
+          "
+          v-model:piCreatedDate="employeeFormData.PICreatedDate"
+          v-model:piCreatedPlace="employeeFormData.PICreatedPlace"
+          v-model:address="employeeFormData.Address"
+          v-model:bankAccount="employeeFormData.BankAccount"
+          v-model:bankBranch="employeeFormData.BankBranch"
+          v-model:bankName="employeeFormData.BankName"
+          v-model:mobile="employeeFormData.Mobile"
+          v-model:avatarFile="employeeFormData.AvatarFile"
+          v-model:avatarLink="employeeFormData.AvatarLink"
+          v-model:email="employeeFormData.Email"
+          :department-options="departmentOptions"
+          v-model:formError="formError"
         ></EmployeeFormBody>
+        <div
+          class="form-footer sticky bottom-0 left-0 right-0 w-[100%] bg-white pb-6 flex justify-between mt-3"
+        >
+          <Button
+            :label="employeeConstantsLanguage.formCancelButtonText"
+            severity="secondary"
+            outlined
+          ></Button>
+          <div class="flex gap-2">
+            <Button
+              @click="showEmployeeFormConfirmDialog(confirm, toast, false)"
+              :label="employeeConstantsLanguage.formAcceptButtonText"
+              outlined
+            ></Button>
+            <Button
+              @click="showEmployeeFormConfirmDialog(confirm, toast, true)"
+              :label="
+                employeeConstantsLanguage.formAcceptAndDuplicateButtonText
+              "
+              ref="createAndCreateNewButton"
+            ></Button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, computed, defineAsyncComponent } from "vue";
+import { onMounted, ref, computed, reactive, nextTick } from "vue";
 import Button from "primevue/button";
 import SplitButton from "primevue/splitbutton";
 import Toolbar from "primevue/toolbar";
@@ -198,87 +280,75 @@ import InputIcon from "primevue/inputicon";
 import IconField from "primevue/iconfield";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import { useDialog } from "primevue/usedialog";
+import ProgressSpinner from "primevue/progressspinner";
 import BackEndPaginator from "@/uikits/backendpaginator/index.vue";
 import EmployeeFormBody from "./EmployeeFormBody.vue";
+import { employeeConstants } from "./EmployeeConstants";
+import { genderLanguage } from "@/constants/gender";
+import { useDialog } from "primevue/usedialog";
 import { EmployeeService } from "./EmployeeService";
 import { useConvert } from "@/hooks/useConvert.js";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import { useHelperStore } from "@/stores/HelperStore";
+
+import Listbox from "primevue/listbox";
+const helperStore = useHelperStore();
 const confirm = useConfirm();
 const toast = useToast();
 const dialog = useDialog();
-
+const isShowExportFuntion = ref();
+const aRef = ref();
+const excelListBoxPosition = ref({
+  x: 0,
+  y: 0,
+});
 // Các hàm covert thông tin từ DB sang chữ cho người dùng đọc
-const { convertGenderDBToUIText, covertDateDBToUIText } = useConvert();
-
-// Hiển thị paginator sau khi đã fetch API về thành công để phân trang không bị trống
-const paginatorPending = ref(false);
+const { convertGenderDBToUIText, convertDateDBToUIText } = useConvert();
 
 // Thông tin nhân viên lấy từ EmployeeService
 const {
-  isPending,
+  isGettingEmployeeData,
+  isShowEmployeeForm,
   employeeData,
   employeeSelected,
   tableInf,
+  employeeFormData,
   employeePaging,
   numberRecordsPerPageOptions,
-  employeeExtenFunctionOptions,
-  getEmployeeAsync,
-  deleteEmployeeByIdAsync,
+  formMode,
+  formModeEnum,
   departmentOptions,
-  formHeadingDictionary,
+  employeeConstantsLanguage,
+  employeeTableInf,
+  paginatorPending,
+  formError,
+  showEmployeeForm,
+  showEmployeeFormConfirmDialog,
+  hideEmployeeForm,
+  unSelectAllEmployee,
   confirmDeleteOneEmployee,
+  getEmployeeAsyncWitdhPending,
+  getEmployeeAsync,
+  getNewEmployeeCode,
+  createOneEmployeeAsync,
+  updateOneEmployeeAsync,
+  deleteEmployeeByIdAsync,
+  getDepartmentOptionsAsync,
+  exportExcelCurrentPage,
 } = EmployeeService();
-// Form thông tin nhân viên
-const isShowEmployeeForm = ref(false);
-const formHeadingDictionaryLanguage = computed(() => {
-  return formHeadingDictionary[useHelperStore().language];
-});
-const formHeading = ref(formHeadingDictionary["VN"].Create);
-function onRowSelect(event) {
-  console.log(event);
-}
 
-function onRowUnselect(event) {}
-/**
- * Hàm bỏ chọn tất cả những nhân viên đã chọn
- * Created by: nkmdang 01/03/2024
- */
-function unSelectAllEmployee() {
-  employeeSelected.value = [];
-}
-
-/**
- * Hàm lấy thông tin nhân viên với pending để tránh Paginator không hiện danh sách trang
- * do chưa lấy được tổng số bản ghi
- * Created by: nkmdang 06/01/2024
- */
-async function getEmployeeAsyncWitdhPending() {
-  paginatorPending.value = false;
-  await getEmployeeAsync();
-  paginatorPending.value = true;
-}
-
-/**
- * Hàm mở Form thông tin nhân viên lên
- * Created by: nkmdang 11/03/2024
- */
-function showEmployeeForm() {
-  isShowEmployeeForm.value = true;
-}
-
-/**
- * Hàm mở Form thông tin nhân viên lên
- * Created by: nkmdang 11/03/2024
- */
-function hideEmployeeForm() {
-  isShowEmployeeForm.value = false;
+async function showExportExcelOption(event) {
+  const origin = event.target.getBoundingClientRect();
+  console.log(origin);
+  excelListBoxPosition.value.x = window.innerWidth - Math.ceil(origin.right);
+  excelListBoxPosition.value.y = Math.ceil(origin.bottom);
+  await nextTick();
 }
 
 onMounted(async () => {
   await getEmployeeAsyncWitdhPending();
+  await getDepartmentOptionsAsync();
 });
 </script>
 
@@ -297,7 +367,7 @@ onMounted(async () => {
   }
 }
 
-div[data-pc-section="wrapper"] {
+.table-container div[data-pc-section="wrapper"] {
   overflow: visible !important;
   width: 100%;
   height: 100%;
@@ -359,14 +429,12 @@ nav[data-pc-section="paginatorwrapper"] {
 }
 
 tbody[role="rowgroup"] td {
-  padding: 8px !important;
+  padding: 8px 14px !important;
 }
 
-// td:first-child {
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   width: 100%;
-//   height: 100%;
-// }
+.form-box {
+  max-height: 90vh;
+  max-width: 95vw;
+  overflow-y: auto;
+}
 </style>

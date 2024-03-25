@@ -15,6 +15,7 @@
       <div>
         <Dropdown
           :options="languageDictionary"
+          option-label="label"
           v-model="helperStore.language"
           @change="onChangeLanguage"
         ></Dropdown>
@@ -22,7 +23,7 @@
       <button
         tabindex="0"
         class="p-link layout-topbar-button"
-        v-tooltip.bottom="'Hồ sơ cá nhân'"
+        v-tooltip.bottom="topBarTooltipLanguage.profile"
       >
         <i class="pi pi-user"></i>
         <span>Profile</span>
@@ -30,7 +31,7 @@
       <button
         tabindex="0"
         class="p-link layout-topbar-button"
-        v-tooltip.bottom="'Cài đặt'"
+        v-tooltip.bottom="topBarTooltipLanguage.setting"
       >
         <i class="pi pi-cog"></i>
         <span>Settings</span>
@@ -46,12 +47,26 @@ import { useLayout } from "./composable/useLayout";
 import { usePrimeVue } from "primevue/config";
 import Dropdown from "primevue/dropdown";
 import { locales } from "@/constants/locale";
+import { languageDictionary } from "@/constants/languages";
 const { onMenuToggle } = useLayout();
 const primevue = usePrimeVue();
 const helperStore = useHelperStore();
-const languageDictionary = helperStore.languageDictionary;
 const localesLanguage = computed(() => {
-  return locales[helperStore.language];
+  return locales[helperStore.language.code];
+});
+
+const topBarTooltip = {
+  vi: {
+    profile: "Hồ sơ cá nhân",
+    setting: "Cài đặt",
+  },
+  en: {
+    profile: "My profile",
+    setting: "Setting",
+  },
+};
+const topBarTooltipLanguage = computed(() => {
+  return topBarTooltip[helperStore.language.code];
 });
 
 /**
@@ -63,8 +78,10 @@ function onChangeLanguage() {
     ...primevue.config.locale,
     ...localesLanguage.value,
   };
-  console.log(primevue.config.locale);
 }
+
+// Gọi hàm onChangeLanguage để lấy locale khi mở trang web
+onChangeLanguage();
 </script>
 
 <style lang="scss" scoped></style>

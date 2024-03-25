@@ -21,9 +21,16 @@
 
       <!-- Login Section -->
       <div
-        class="login-form sm:px-12 px-4 xs:min-h-[100%] w-[100%] xl:w-[40%] 2xl:w-[50%] flex items-center justify-center"
+        class="login-form relative sm:px-12 px-4 xs:min-h-[100%] w-[100%] xl:w-[40%] 2xl:w-[50%] flex items-center justify-center"
       >
         <div class="w-[100%] sm:min-h-[100%] flex flex-col justify-center">
+          <div class="absolute right-4 sm:right-12 top-4 sm:top-6">
+            <Dropdown
+              :options="languageDictionary"
+              option-label="label"
+              v-model="helperStore.language"
+            ></Dropdown>
+          </div>
           <div class="logo-box flex justify-center">
             <img
               class="xs:h-[100px] lg:h-[130px]"
@@ -32,9 +39,9 @@
             />
           </div>
           <h1
-            class="text-primary-500 font-semibold text-center text-[24px] mb-8"
+            class="text-primary-500 font-semibold text-center text-[1.5rem] sm:text-[2rem] mb-8"
           >
-            Đăng nhập
+            {{ loginConstants[helperStore.languageCode].login }}
           </h1>
 
           <div class="w-[100%]">
@@ -42,17 +49,27 @@
               <label for="email" class="font-[500]">Email</label>
               <br />
               <InputText
+                :invalid="formError?.Email ? true : false"
                 id="email"
                 class="h-[36px] w-[100%]"
                 placeholder="Email"
                 v-model="email"
               ></InputText>
+              <br />
+              <small
+                class="block h-[1rem] invisible text-[red]"
+                :class="{ '!visible': formError.Email }"
+                >{{ formError?.Email }}</small
+              >
             </div>
 
             <div class="mt-4">
-              <label for="password" class="font-[500]">Password</label>
+              <label for="password" class="font-[500]">{{
+                loginConstantsLanguage.password
+              }}</label>
               <br />
               <Password
+                :invalid="formError?.Password ? true : false"
                 :feedback="false"
                 :toggle-mask="true"
                 id="password"
@@ -61,15 +78,24 @@
                 placeholder="Password"
                 v-model="password"
               ></Password>
+              <small
+                class="block h-[1rem] invisible text-[red]"
+                :class="{ '!visible': formError.Email }"
+                >{{ formError?.Password }}</small
+              >
             </div>
 
             <div class="flex justify-between mt-2">
               <div class="">
                 <Checkbox v-model="keepMeSignIn" :binary="true"></Checkbox>
-                <label class="ml-2">Giữ tôi đăng nhập</label>
+                <label class="ml-2">{{
+                  loginConstantsLanguage.keepMeSignIn
+                }}</label>
               </div>
               <div class="text-primary-500">
-                <router-link to=""> Chưa có tài khoản </router-link>
+                <router-link to="">
+                  {{ loginConstantsLanguage.donnotHaveAccount }}
+                </router-link>
               </div>
             </div>
 
@@ -78,7 +104,7 @@
                 v-if="!isPending"
                 class="w-[100%] rounded-[40px]"
                 @click="loginAsync"
-                >Đăng nhập</Button
+                >{{ loginConstantsLanguage.login }}</Button
               >
               <Button
                 v-else
@@ -86,8 +112,8 @@
                 class="w-[100%] rounded-[40px]"
                 disabled
                 @click="loginAsync"
-                >Đăng nhập</Button
-              >
+                >{{
+              }}</Button>
             </div>
           </div>
         </div>
@@ -97,34 +123,38 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Checkbox from "primevue/checkbox";
+import Dropdown from "primevue/dropdown";
 import { useToast } from "primevue/usetoast";
-import { ref } from "vue";
+import { languageDictionary } from "@/constants/languages";
 import { useLogin } from "./useLogin";
-import { useToastService } from "@/hooks/useToastService";
+import { useHelperStore } from "@/stores/HelperStore";
 import { useRouter } from "vue-router";
-const email = ref(null);
-const password = ref(null);
-const keepMeSignIn = ref(false);
+const helperStore = useHelperStore();
 const toast = useToast();
-const { isPending, login } = useLogin();
+const {
+  email,
+  password,
+  keepMeSignIn,
+  isPending,
+  formError,
+  loginConstants,
+  login,
+} = useLogin();
+const loginConstantsLanguage = computed(() => {
+  return loginConstants[helperStore.languageCode];
+});
 const router = useRouter();
 async function loginAsync() {
-  await login(email.value, password.value, toast);
-  const { showToast } = useToastService();
-  showToast(toast, "LoginSuccess");
-  // Sau khi hiển thị toast thông báo thành công thì chuyển trang đến trang Home
-  setTimeout(
-    () =>
-      router.push({
-        name: "Home",
-        params: {},
-      }),
-    500
-  );
+  try {
+    await login(email.value, password.value, toast, router);
+  } catch (error) {
+    console.log(error);
+  }
 }
 </script>
 

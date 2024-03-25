@@ -7,9 +7,8 @@ import { resources } from "@/constants/resources";
  * Create by: nkmdang 1/3/2024
  */
 function getResource(resouceType, resourceName) {
-  console.log(resources, resourceName);
   const helperStore = useHelperStore();
-  const languageCode = helperStore.language;
+  const languageCode = helperStore.language.code;
   return resources[languageCode][resouceType][resourceName];
 }
 
