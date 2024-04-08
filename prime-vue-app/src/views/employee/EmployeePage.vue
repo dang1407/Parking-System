@@ -20,19 +20,19 @@
             v-show="parseInt(employeeSelected.length) > 1"
           >
             <div class="font-semibold">
-              {{ employeeConstants[helperStore.languageCode].selected }}
+              {{ employeeConstantsLanguage.selected }}
               {{ employeeSelected.length }}
             </div>
             <Button
               class="h-[36px]"
               @click="unSelectAllEmployee"
-              :label="employeeConstants[helperStore.languageCode].unselect"
+              :label="employeeConstantsLanguage.unselect"
               severity="info"
               outlined
             />
             <Button
               class="h-[36px]"
-              :label="employeeConstants[helperStore.languageCode].delete"
+              :label="employeeConstantsLanguage.delete"
               icon="pi pi-trash"
               severity="danger"
               outlined
@@ -64,8 +64,7 @@
               <div @click="(e) => showExportExcelOption(e)">
                 <i
                   v-tooltip.bottom="
-                    employeeConstants[helperStore.languageCode]
-                      .exportExcelFileTooltip
+                    employeeConstantsLanguage.exportExcelFileTooltip
                   "
                   class="text-2xl pi pi-file-export pi-click-icon"
                 ></i>
@@ -142,30 +141,24 @@
               >
                 <template #body="data">
                   <div class="">
-                    <!-- Danh sách dropdown các chức năng thêm: nhân bản, ... -->
+                    <!-- Danh sách dropdown các chức năng thêm: nhân bản, ...  -->
                     <div class="">
-                      <!-- Nút sửa -->
+                      <!-- Nút sửa  -->
                       <SplitButton
                         @click="showEmployeeForm(formModeEnum.Update, data)"
                         class="h-[32px]"
-                        :label="
-                          employeeConstants[helperStore.languageCode].update
-                        "
+                        :label="employeeConstantsLanguage.update"
                         icon="pi pi-chevron-down"
                         :model="[
                           {
-                            label:
-                              employeeConstants[helperStore.languageCode]
-                                .delete,
+                            label: employeeConstantsLanguage.delete,
                             command: () => {
                               // console.log(data.data.EmployeeId);
                               confirmDeleteOneEmployee(confirm, toast, data);
                             },
                           },
                           {
-                            label:
-                              employeeConstants[helperStore.languageCode]
-                                .replication,
+                            label: employeeConstantsLanguage.replication,
                           },
                         ]"
                       >
@@ -220,11 +213,12 @@
         </div>
         <EmployeeFormBody
           :departmentOptions="departmentOptions"
+          :titleOptions="titleOptions"
           v-model:employeeCode="employeeFormData.EmployeeCode"
           v-model:employeeFullName="employeeFormData.FullName"
           v-model:gender="employeeFormData.Gender"
           v-model:department="employeeFormData.DepartmentName"
-          v-model:positionName="employeeFormData.PositionName"
+          v-model:titleName="employeeFormData.TitleName"
           v-model:dateOfBirth="employeeFormData.DateOfBirth"
           v-model:personalIdentification="
             employeeFormData.PersonalIdentification
@@ -243,7 +237,7 @@
           v-model:formError="formError"
         ></EmployeeFormBody>
         <div
-          class="form-footer sticky bottom-0 left-0 right-0 w-[100%] bg-white pb-6 flex justify-between mt-3"
+          class="form-footer sticky bottom-0 left-0 right-0 w-[100%] bg-white pb-6 pt-2 flex justify-between mt-3"
         >
           <Button
             :label="employeeConstantsLanguage.formCancelButtonText"
@@ -291,7 +285,9 @@ import { useConvert } from "@/hooks/useConvert.js";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import { useHelperStore } from "@/stores/HelperStore";
-
+// import the styles
+import "vue-good-table/dist/vue-good-table.css";
+import { VueGoodTable } from "vue-good-table";
 import Listbox from "primevue/listbox";
 const helperStore = useHelperStore();
 const confirm = useConfirm();
@@ -319,6 +315,7 @@ const {
   formMode,
   formModeEnum,
   departmentOptions,
+  titleOptions,
   employeeConstantsLanguage,
   employeeTableInf,
   paginatorPending,
@@ -334,8 +331,9 @@ const {
   createOneEmployeeAsync,
   updateOneEmployeeAsync,
   deleteEmployeeByIdAsync,
-  getDepartmentOptionsAsync,
   exportExcelCurrentPage,
+  getDepartmentOptionsAsync,
+  getTitleOptionsAsync,
 } = EmployeeService();
 
 async function showExportExcelOption(event) {
@@ -349,6 +347,7 @@ async function showExportExcelOption(event) {
 onMounted(async () => {
   await getEmployeeAsyncWitdhPending();
   await getDepartmentOptionsAsync();
+  await getTitleOptionsAsync();
 });
 </script>
 
@@ -361,9 +360,6 @@ onMounted(async () => {
     width: 100%;
     height: calc(100% - 48px);
     overflow: scroll;
-  }
-
-  .table-paging {
   }
 }
 

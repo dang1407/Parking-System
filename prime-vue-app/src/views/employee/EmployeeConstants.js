@@ -48,6 +48,7 @@ export const employeeConstants = {
       BankName: "Tên ngân hàng",
       BankBranch: "Chi nhánh ngân hàng",
       chooseImage: "Chọn hình ảnh",
+      ChooseDepartmentBefore: "Vui lòng chọn đơn vị trước",
     },
     formError: {
       FullNameMaxLengthAndRequire:
@@ -154,6 +155,7 @@ export const employeeConstants = {
       BankName: "Bank Name",
       BankBranch: "Bank Branch",
       chooseImage: "Choose an image",
+      ChooseDepartmentBefore: "Please select one department",
     },
     formError: {
       FullNameMaxLengthAndRequire:

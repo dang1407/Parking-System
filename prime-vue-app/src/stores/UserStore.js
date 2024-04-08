@@ -7,6 +7,7 @@ export const useUserStore = defineStore("userStore", {
     isShowProgress: false,
     isLogined: false,
     accessToken: localStorage.getItem("accessToken"),
+    companyId: localStorage.getItem("companyId"),
     role: "",
     loginData: {
       UserName: "",

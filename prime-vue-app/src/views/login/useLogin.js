@@ -44,7 +44,6 @@ const helperStore = useHelperStore();
  * @param {*} toast
  */
 function validateLogin(email, password, toast) {
-  console.log(email, password, toast);
   let emptyErrorMessage = "";
   formError.value = {
     Email: "",
@@ -69,7 +68,6 @@ function validateLogin(email, password, toast) {
     emptyErrorMessage =
       loginConstants[helperStore.language.code].PasswordEmpty + ". ";
   }
-  console.log(emptyErrorMessage);
   if (emptyErrorMessage) {
     toast.add({
       severity: "warn",
@@ -110,8 +108,11 @@ async function login(email, password, toast, router) {
     const userStore = useUserStore();
     userStore.accessToken = data.AccessToken;
     localStorage.setItem("accessToken", data.AccessToken);
+    localStorage.setItem("companyId", data.CompanyId);
     userStore.role = data.Role;
     userStore.isLogined = true;
+    userStore.companyId = data.CompanyId;
+    console.log(data);
     const { showToast } = useToastService();
     showToast(toast, "LoginSuccess");
     // Sau khi hiển thị toast thông báo thành công thì chuyển trang đến trang Home
@@ -125,6 +126,7 @@ async function login(email, password, toast, router) {
     );
     return data;
   } catch (error) {
+    console.log(error);
     if (error?.response?.status === 400) {
       toast.add(getResource("Toast", "ForgotLoginData"));
     }

@@ -116,17 +116,21 @@
     <div class="mt-4 flex flex-col gap-y-3">
       <!-- Chức danh -->
       <div class="flex flex-col flex-1">
-        <label class="font-bold" for="position">{{
-          employeeFormLabel.Position
-        }}</label>
-        <InputText
-          :invalid="formError?.PositionName ? true : false"
+        <label class="font-bold" for="position"
+          >{{ employeeFormLabel.Position }}
+          <span class="text-required text-[1.5rem]">*</span>
+        </label>
+        <Dropdown
+          :options="titleDropdownOptions"
+          :invalid="formError?.TitleName ? true : false"
+          :empty-message="employeeFormLabel.ChooseDepartmentBefore"
           class="h-basic-input"
           id="position"
-          v-model="positionName"
-        ></InputText>
-        <small class="text-[red] font-bold" v-show="formError?.PositionName">
-          {{ formError?.PositionName }}
+          v-model="titleName"
+        >
+        </Dropdown>
+        <small class="text-[red] font-bold" v-show="formError?.TitleName">
+          {{ formError?.TitleName }}
         </small>
       </div>
       <div class="flex flex-col sm:flex-row gap-2">
@@ -351,6 +355,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  titleOptions: {
+    type: Array,
+    required: true,
+  },
 });
 const employeeCode = defineModel("employeeCode");
 const employeeFullName = defineModel("employeeFullName");
@@ -361,7 +369,7 @@ const currentUrl = ref();
 const formError = defineModel("formError");
 const department = defineModel("department");
 const gender = defineModel("gender");
-const positionName = defineModel("positionName");
+const titleName = defineModel("titleName");
 const dateOfBirth = defineModel("dateOfBirth");
 const personalIdentification = defineModel("personalIdentification");
 const piCreatedDate = defineModel("piCreatedDate");
@@ -378,6 +386,17 @@ const employeeFormLabel = computed(() => {
 });
 const genderLabel = computed(() => {
   return genderLanguage[helperStore.languageCode];
+});
+
+const titleDropdownOptions = computed(() => {
+  const emptyArray = [];
+  console.log(department.value);
+  for (let i = 0; i < props.titleOptions.length; i++) {
+    if (props.titleOptions[i].DepartmentName == department.value) {
+      emptyArray.push(props.titleOptions[i].TitleName);
+    }
+  }
+  return emptyArray;
 });
 
 const { employeeFormData } = EmployeeService();

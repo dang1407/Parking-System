@@ -27,7 +27,7 @@ const tableInf = [
 
 const departmentOptions = ref();
 
-// Thông tin nhân viên sẽ gửi cho backend
+// Thông tin đơn vị sẽ gửi cho backend
 const departmentFormData = ref({});
 
 const formModeEnum = {
@@ -37,17 +37,17 @@ const formModeEnum = {
 };
 const formMode = ref();
 
-// Thông tin nhân viên
+// Thông tin đơn vị
 const departmentData = ref();
 
-// Thông tin các nhân viên được chọn
+// Thông tin các đơn vị được chọn
 const departmentSelected = ref([]);
 // Thông tin phân trang
 const departmentPaging = ref({
   totalRecords: 0,
   page: 1, // Đang xem trang thứ mấy
   pageSize: 20, // Bao nhiêu bản ghi trong trang
-  departmentSearchProperty: "", // Thông tin tìm kiếm nhân viên
+  departmentSearchProperty: "", // Thông tin tìm kiếm đơn vị
 });
 // Danh sách số bản ghi mỗi trang truyển thằng vào BackEndPaginator
 const numberRecordsPerPageOptions = [10, 20, 50, 100];
@@ -57,7 +57,7 @@ const formError = ref({});
 
 // Hiển thị paginator sau khi đã fetch API về thành công để phân trang không bị trống
 const paginatorPending = ref(false);
-// Thông tin trên bảng các nhân viên
+// Thông tin trên bảng các đơn vị
 const departmentTableInf = computed(() => {
   const newDepartmentTableInf = mergeWith(
     tableInf,
@@ -67,14 +67,14 @@ const departmentTableInf = computed(() => {
   return newDepartmentTableInf;
 });
 
-// Form thông tin nhân viên
+// Form thông tin đơn vị
 const isShowDepartmentForm = ref(false);
 const departmentConstantsLanguage = computed(() => {
   return departmentConstants[helperStore.language.code];
 });
 
 /**
- * Hàm bỏ chọn tất cả những nhân viên đã chọn
+ * Hàm bỏ chọn tất cả những đơn vị đã chọn
  * Created by: nkmdang 01/03/2024
  */
 function unSelectAllDepartment() {
@@ -82,7 +82,7 @@ function unSelectAllDepartment() {
 }
 
 /**
- * Hàm lấy thông tin nhân viên với pending để tránh Paginator không hiện danh sách trang
+ * Hàm lấy thông tin đơn vị với pending để tránh Paginator không hiện danh sách trang
  * do chưa lấy được tổng số bản ghi
  * Created by: nkmdang 06/01/2024
  */
@@ -93,7 +93,7 @@ async function getDepartmentAsyncWitdhPending() {
 }
 
 /**
- * Hàm mở Form thông tin nhân viên lên
+ * Hàm mở Form thông tin đơn vị lên
  * Created by: nkmdang 11/03/2024
  */
 async function showDepartmentForm(mode, data) {
@@ -114,7 +114,7 @@ async function showDepartmentForm(mode, data) {
 }
 
 /**
- * Hàm mở Form thông tin nhân viên lên
+ * Hàm mở Form thông tin đơn vị lên
  * Created by: nkmdang 11/03/2024
  */
 function hideDepartmentForm() {
@@ -134,7 +134,7 @@ function showDepartmentFormConfirmDialog(confirm, toast, showDuplicateForm) {
     ),
     header: departmentConstantsLanguage.value.confirmDialog.header,
     accept: async () => {
-      // Tạo mới một nhân viên
+      // Tạo mới một đơn vị
       if (formMode.value === formModeEnum.Create) {
         await createOneDepartmentAsync(toast, helperStore.languageCode);
       } else if (formMode.value === formModeEnum.Update) {
@@ -153,7 +153,7 @@ function showDepartmentFormConfirmDialog(confirm, toast, showDuplicateForm) {
 }
 
 /**
- * Confirm Dialog xác nhận có xóa thông tin nhân viên hay không
+ * Confirm Dialog xác nhận có xóa thông tin đơn vị hay không
  * @param {useConfirm() ("primevue/useconfirm")} confirm
  * @param {useToast() ("primevue/usetoast")} toast
  * @param {Object (nhận từ DataTable)} data
@@ -176,7 +176,7 @@ function confirmDeleteOneDepartment(confirm, toast, data) {
 }
 
 /**
- * Hàm lấy thông tin nhân viên từ Backend theo phân trang
+ * Hàm lấy thông tin đơn vị từ Backend theo phân trang
  * Created by: nkmdang 01/03/2024
  */
 async function getDepartmentAsync() {
@@ -202,7 +202,7 @@ async function getDepartmentAsync() {
 }
 
 /**
- * Hàm thêm mới một nhân viên
+ * Hàm thêm mới một đơn vị
  * @param {ToastServiceMethods} toast Toast service dùng để mở Toast
  * @param {String} languageCode
  * Created by: nkmdang 18/03/2024
@@ -237,7 +237,7 @@ async function createOneDepartmentAsync(toast, languageCode) {
 }
 
 /**
- * Hàm cập nhật thông tin một nhân viên
+ * Hàm cập nhật thông tin một đơn vị
  * @param {ToastServiceMethods} toast Toast service dùng để mở Toast
  * @param {} languageCode
  * Created by: nkmdang 18/03/2024
@@ -315,7 +315,7 @@ function convertDepartmentFormDataToFormData(mode) {
 }
 
 /**
- * Hàm validate các thông tin nhân viên
+ * Hàm validate các thông tin đơn vị
  * @returns Boolean
  */
 function validateDepartmentFormData(formData) {
@@ -446,7 +446,7 @@ function handleDepartmentFormDataError(error) {
 }
 
 /**
- * Hàm xóa thông tin nhân viên theo Id
+ * Hàm xóa thông tin đơn vị theo Id
  * @param {Guid (String)} departmentId
  * @returns
  */
@@ -460,8 +460,8 @@ async function deleteDepartmentByIdAsync(toast, departmentId) {
 }
 
 /**
- * Hàm lấy mã nhân viên mới từ backend
- * @returns Mã nhân viên mới
+ * Hàm lấy mã đơn vị mới từ backend
+ * @returns Mã đơn vị mới
  * Created by: nkmdang 14/03/2024
  */
 async function getNewDepartmentCode() {

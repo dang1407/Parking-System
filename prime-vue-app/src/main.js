@@ -14,7 +14,6 @@ import Ripple from "primevue/ripple";
 import router from "@/router";
 import { createPinia } from "pinia";
 import { createI18n } from "vue-i18n";
-
 //in main.js
 
 // Locale for Primevue
@@ -40,12 +39,12 @@ app.config.errorHandler = (err, vm, info) => {
   // handle error
   // `info` is a Vue-specific error info, e.g. which lifecycle hook
   // the error was found in
-  console.log(err + "\n" + info);
+  console.log(err + "\n" + vm + "\n" + info);
 };
 
 app.config.warnHandler = function (msg, vm, trace) {
   // `trace` is the component hierarchy trace
-  console.log(msg + "\n" + trace);
+  console.log(msg + "\n" + vm + "\n" + trace);
 };
 
 app.use(router);

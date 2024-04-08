@@ -3,7 +3,6 @@ import { ref } from "vue";
 import { useToastService } from "./useToastService";
 import { useUserStore } from "@/stores/UserStore";
 import { merge } from "lodash-es";
-import Cookies from "js-cookie";
 const isPending = ref(false);
 
 /** Hàm tạo axios service */
@@ -101,8 +100,8 @@ function createService(toast) {
 
 function request(axiosConfig, toast) {
   const userStore = useUserStore();
-  if (!axiosConfig.method || !axiosConfig.url) {
-    throw "axiosConfig chưa có method hoặc url";
+  if (!axiosConfig.method) {
+    throw "axiosConfig chưa có method hoặc model";
   }
 
   if (
@@ -111,17 +110,18 @@ function request(axiosConfig, toast) {
   ) {
     throw "axiosConfig chưa có data khi post hoặc put";
   }
-  const token = Cookies.get("accessToken");
+
   const defaultConfig = {
     headers: {
-      // 携带 Token
-      Authorization: `Bearer ${Cookies.get("accessToken")}`,
+      // Token
+      Authorization: `Bearer ${userStore.accessToken}`,
       "Content-Type": "application/json",
     },
     timeout: 5000,
     baseURL: import.meta.env.VITE_BASE_API,
     data: {},
   };
+
   const mergeService = merge(defaultConfig, axiosConfig);
   const service = createService(toast);
   return service(mergeService);

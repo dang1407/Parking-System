@@ -2,13 +2,15 @@ import { useAxios } from "@/hooks/useAxios";
 import { useConvert } from "@/hooks/useConvert";
 import { ref, computed } from "vue";
 import { DepartmentAPI } from "../department/DepartmentAPI";
+import { TitleAPI } from "../title/TitleAPI";
 import { useValidate } from "@/hooks/useValidate";
 import { employeeConstants } from "./EmployeeConstants";
 import { useHelperStore } from "@/stores/HelperStore";
+import { useUserStore } from "@/stores/UserStore";
 import { mergeWith } from "lodash-es";
-import { data } from "autoprefixer";
 const { request } = useAxios();
 const helperStore = useHelperStore();
+const userStore = useUserStore();
 const {
   convertDateDBToUIText,
   convertDatePrimeCalendarToDateDB,
@@ -16,6 +18,7 @@ const {
   getCurrentTimeString,
 } = useConvert();
 const { getDepartmentDataAsync } = DepartmentAPI();
+const { getTitleDataAsync } = TitleAPI();
 const isGettingEmployeeData = ref(false);
 // Thông tin sẽ hiển thị lên bảng
 const tableInf = [
@@ -41,7 +44,7 @@ const tableInf = [
     tdStyle: "w-[200px] sm:min-w-56",
   },
   {
-    field: "PositionName",
+    field: "TitleName",
     tdStyle: "w-[240px] sm:min-w-60",
   },
   {
@@ -59,7 +62,8 @@ const tableInf = [
 ];
 
 const departmentOptions = ref();
-
+let departmentData = [];
+const titleOptions = ref([]);
 // Thông tin nhân viên sẽ gửi cho backend
 const employeeFormData = ref({});
 
@@ -80,7 +84,7 @@ const employeePaging = ref({
   totalRecords: 0,
   page: 1, // Đang xem trang thứ mấy
   pageSize: 20, // Bao nhiêu bản ghi trong trang
-  employeeSearchProperty: "", // Thông tin tìm kiếm nhân viên
+  searchProperty: "", // Thông tin tìm kiếm nhân viên
 });
 // Danh sách số bản ghi mỗi trang truyển thằng vào BackEndPaginator
 const numberRecordsPerPageOptions = [10, 20, 50, 100];
@@ -176,7 +180,7 @@ function showEmployeeFormConfirmDialog(confirm, toast, showDuplicateForm) {
       if (showDuplicateForm) {
         employeeFormData.value.EmployeeCode = await getNewEmployeeCode();
       } else {
-        if (!formError.value) {
+        if (!formError.value.isError) {
           hideEmployeeForm();
         }
       }
@@ -213,25 +217,29 @@ function confirmDeleteOneEmployee(confirm, toast, data) {
  * Created by: nkmdang 01/03/2024
  */
 async function getEmployeeAsync() {
-  isGettingEmployeeData.value = true;
-  const response = await request({
-    url: `Employees?page=${employeePaging.value.page}&pageSize=${employeePaging.value.pageSize}&employeeProperty=${employeePaging.value.employeeSearchProperty}`,
-    method: "get",
-  });
-  isGettingEmployeeData.value = false;
-  // console.log(response);
-  // Chuyển đổi định dạng ngày tháng trong db thành dd/mm/yyyy
-  for (let i = 0; i < response.data.length; i++) {
-    response.data[i].DateOfBirth = convertDateDBToUIText(
-      response.data[i].DateOfBirth
-    );
-    response.data[i].PICreatedDate = convertDateDBToUIText(
-      response.data[i].PICreatedDate
-    );
+  try {
+    isGettingEmployeeData.value = true;
+    const response = await request({
+      url: `Employees/${userStore.companyId}?page=${employeePaging.value.page}&pageSize=${employeePaging.value.pageSize}&employeeProperty=${employeePaging.value.searchProperty}`,
+      method: "get",
+    });
+    isGettingEmployeeData.value = false;
+    // console.log(response);
+    // Chuyển đổi định dạng ngày tháng trong db thành dd/mm/yyyy
+    for (let i = 0; i < response.ModelData.length; i++) {
+      response.ModelData[i].DateOfBirth = convertDateDBToUIText(
+        response.ModelData[i].DateOfBirth
+      );
+      response.ModelData[i].PICreatedDate = convertDateDBToUIText(
+        response.ModelData[i].PICreatedDate
+      );
+    }
+    employeeData.value = response.ModelData;
+    // console.log(employeeData.value);
+    employeePaging.value.totalRecords = response.NumberRecords;
+  } catch (error) {
+    console.log(error);
   }
-  employeeData.value = response.data;
-  // console.log(employeeData.value);
-  employeePaging.value.totalRecords = response.countEmployees;
 }
 
 /**
@@ -246,20 +254,21 @@ async function createOneEmployeeAsync(toast, languageCode) {
     if (!validateEmployeeFormData(data)) {
       return;
     }
-    const response = await request(
-      {
-        url: `Employees`,
-        method: "post",
-        data,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      },
-      toast
-    );
-    await getEmployeeAsync();
-    const toastContent = employeeConstantsLanguage.value.Toast;
-    toast.add(toastContent.ActionEmployeeSuccess(toastContent[formMode.value]));
+    // const response = await request(
+    //   {
+    //     url: `Employees/${userStore.companyId}`,
+    //     method: "post",
+    //     data,
+    //     headers: {
+    //       "Content-Type": "multipart/form-data",
+    //     },
+    //   },
+    //   toast
+    // );
+    // await getEmployeeAsync();
+    // const toastContent = employeeConstantsLanguage.value.Toast;
+    // toast.add(toastContent.ActionEmployeeSuccess(toastContent[formMode.value]));
+    formError.value = {};
   } catch (error) {
     console.log(error);
     if (error.response.status === 400) {
@@ -276,12 +285,13 @@ async function createOneEmployeeAsync(toast, languageCode) {
 async function updateOneEmployeeAsync(toast, languageCode) {
   try {
     const data = convertEmployeeFormDataToFormData(formModeEnum.Update);
+    console.log(data);
     if (!validateEmployeeFormData(data)) {
       return;
     }
     const response = await request(
       {
-        url: `Employees/${employeeFormData.value.EmployeeId}`,
+        url: `Employees/${employeeFormData.value.EmployeeId}/${userStore.companyId}`,
         method: "put",
         data,
         headers: {
@@ -293,6 +303,8 @@ async function updateOneEmployeeAsync(toast, languageCode) {
     await getEmployeeAsync();
     const toastContent = employeeConstantsLanguage.value.Toast;
     toast.add(toastContent.ActionEmployeeSuccess(toastContent[formMode.value]));
+    // Sau khi người dùng sửa lỗi và gọi API thành công thì bỏ lỗi của form
+    formError.value = {};
   } catch (error) {
     console.log(error);
   }
@@ -306,6 +318,22 @@ function convertEmployeeFormDataToFormData(mode) {
   const formData = new FormData();
   for (let key in employeeFormData.value) {
     formData.append(key, employeeFormData.value[key]);
+  }
+  for (let i = 0; i < titleOptions.value.length; i++) {
+    console.log(titleOptions.value[i].TitleName);
+    if (titleOptions.value[i].TitleName == employeeFormData.value.TitleName) {
+      formData.set("TitleId", employeeFormData.value.TitleId);
+      break;
+    }
+  }
+
+  for (let i = 0; i < departmentData.length; i++) {
+    if (
+      departmentData[i].DepartmentName == employeeFormData.value.DepartmentName
+    ) {
+      formData.set("DepartmentId", departmentData[i].DepartmentId);
+      break;
+    }
   }
   if (mode === formModeEnum.Create) {
     if (employeeFormData.value.DateOfBirth) {
@@ -336,7 +364,12 @@ function convertEmployeeFormDataToFormData(mode) {
     }
   }
   formData.set("ModifiedDate", getCurrentTimeString());
-  formData.set("DepartmentId", employeeFormData.value.Department?.DepartmentId);
+  // formData.set(
+  //   "DepartmentId",
+  //   employeeFormData.value.Department?.DepartmentId ||
+  //     employeeFormData.value?.DepartmentId
+  // );
+  console.log(formData.get("TitleId"), formData.get("DepartmentId"));
   return formData;
 }
 
@@ -346,6 +379,7 @@ function convertEmployeeFormDataToFormData(mode) {
  */
 function validateEmployeeFormData(formData) {
   const errorObject = {};
+  formError.value = {};
   let isError = false;
   const {
     validateCorrectLength,
@@ -453,6 +487,7 @@ function validateEmployeeFormData(formData) {
   for (let key in errorObject) {
     if (errorObject[key]) {
       formError.value = errorObject;
+      formError.value.isError = true;
       return false;
     }
   }
@@ -486,7 +521,7 @@ async function deleteEmployeeByIdAsync(toast, employeeId) {
  */
 async function getNewEmployeeCode() {
   const response = await request({
-    url: "Employees/NewEmployeeCode",
+    url: `Employees/NewEmployeeCode/${userStore.companyId}`,
     method: "get",
   });
   return response;
@@ -550,9 +585,25 @@ async function exportExcelCurrentPage(page, pageSize, employeeProperty, aRef) {
 async function getDepartmentOptionsAsync() {
   const response = await getDepartmentDataAsync();
   departmentOptions.value = [];
-  response.forEach((department) => {
+  departmentData = response.ModelData;
+  response.ModelData.forEach((department) => {
     departmentOptions.value.push(department.DepartmentName);
   });
+}
+
+// Title
+/**
+ * Hàm lấy thông tin các chức danh
+ * Created by: nkmdang 29/03/2024
+ */
+async function getTitleOptionsAsync() {
+  try {
+    const response = await getTitleDataAsync();
+
+    titleOptions.value = response.ModelData;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export function EmployeeService() {
@@ -566,6 +617,7 @@ export function EmployeeService() {
     tableInf,
     numberRecordsPerPageOptions,
     departmentOptions,
+    titleOptions,
     formMode,
     formModeEnum,
     employeeTableInf,
@@ -583,7 +635,8 @@ export function EmployeeService() {
     createOneEmployeeAsync,
     updateOneEmployeeAsync,
     deleteEmployeeByIdAsync,
-    getDepartmentOptionsAsync,
     exportExcelCurrentPage,
+    getDepartmentOptionsAsync,
+    getTitleOptionsAsync,
   };
 }
