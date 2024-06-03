@@ -1,9 +1,11 @@
 ﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using System.Reflection;
 
 using System.Resources;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers
 {
@@ -43,6 +45,15 @@ namespace WebAPI.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("jwtData")]
+        public IActionResult GetJwtData()
+        {
+            var user = HttpContext.User.FindFirstValue("CompanyId");
+            return Ok(user);    
         }
 
         public class IndexDTO

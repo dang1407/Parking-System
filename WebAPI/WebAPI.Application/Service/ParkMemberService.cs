@@ -12,10 +12,12 @@ namespace WebAPI.Application
     {
 
         private readonly IParkMemberRepository _parkMemberRepository;
-        public ParkMemberService(IParkMemberRepository parkMemberRepository, IMapper mapper) : base(parkMemberRepository, mapper)
+        private readonly IAccountService _accountService;
+        public ParkMemberService(IParkMemberRepository parkMemberRepository, IAccountService accountService, IMapper mapper) : base(parkMemberRepository, mapper)
         {
 
             _parkMemberRepository = parkMemberRepository;   
+            _accountService = accountService; 
         }
 
         public Task<byte[]> ExportParkMemberExcelAsync(List<ParkMemberDTO> parkMemberDTOs, int page, int pageSize)
@@ -44,95 +46,34 @@ namespace WebAPI.Application
             return newParkMemberCode.ToString();
         }
 
-        /// <summary>
-        /// Hàm lấy ra số khách hàng gửi xe có trong database
-        /// </summary>
-        /// <returns>Số khách hàng gửi xe trong database (int)</returns>
-        public async Task<int> GetNumParkMembersAsync()
-        {
-            int numParkMembers = await _parkMemberRepository.GetNumParkMembersAsync();  
-            return numParkMembers;  
-        }
-
-        public async Task<List<ParkMemberDTO>?> GetParkMemberByFullNameAsync(int page, int pageSize, string parkMemberFullName)
-        {
-            // Số thứ trang trong DB bắt đầu từ 0 nhưng số thứ tự ở Frontend bắt đầu từ 1 nên cần trừ 1
-            var parkMembers = await _parkMemberRepository.GetParkMemberByFullNameAsync(page - 1, pageSize, parkMemberFullName); 
-            if(parkMembers != null)
-            {
-                var parkMemberDTOs = parkMembers.Select(parkMember => MapEntityToDTO(parkMember)).ToList();
-                return parkMemberDTOs;
-            }
-            else return null;  
-              
-        }
 
         /// <summary>
-        /// Hàm tìm kiếm khách hàng gửi xe theo số điện thoại
+        /// Hàm tạo mới một ParkMember và tạo Account cho ParkMember
         /// </summary>
-        /// <param name="mobile">Số điện thoại khách hàng</param>
-        /// <returns>Thông tin khách hàng nếu tìm thấy</returns>
-        /// Created by: nkmdang 1/1/2024
-        public async Task<ParkMemberDTO?> GetParkMemberByMobileAsync(string mobile)
-        {
-            var parkMember = await _parkMemberRepository.GetParkMemberByMobileAsync(mobile);
-            if(parkMember != null)
-            {
-                var parkMemberDTO = MapEntityToDTO(parkMember);
-                return parkMemberDTO;
-            }
-            else
-            {
-                return null;    
-            }
-        }
-
-        /// <summary>
-        /// Hàm tìm kiếm khách hàng gửi xe theo mã khách hàng
-        /// </summary>
-        /// <param name="parkMemberCode">Mã khách hàng</param>
-        /// <returns>Thông tin khách hàng tìm kiếm theo mã khách hàng</returns>
-        /// Created by: nkmdang 1/1/2024
-        public async Task<ParkMemberDTO?> GetParkMemberByParkMemberCodeAsync(string parkMemberCode)
-        {
-            var parkMember = await _parkMemberRepository.GetParkMemberByParkMemberCodeAsync(parkMemberCode);
-            if (parkMember != null)
-            {
-                var parkMemberDTO = MapEntityToDTO(parkMember);
-                return parkMemberDTO;
-            }
-            else
-            { 
-                return null; 
-            }
-        }
-        /// <summary>
-        /// Hàm tìm kiếm khách hàng gửi xe theo biển số xe
-        /// </summary>
-        /// <param name="licensePlate">Biển số xe cần tìm kiếm</param>
+        /// <param name="createDTO"></param>
+        /// <param name="companyId"></param>
         /// <returns></returns>
-        /// Created by: nkmdang 17/1/2023
-        public async Task<ParkMemberDTO?> GetParkMemberByLicensePlateAsync(string licensePlate)
+        /// <exception cref="Exception">Lỗi khi tạo Account</exception>
+        public override async Task<ParkMemberDTO> InsertAsync(ParkMemberCreateDTO createDTO, Guid companyId)
         {
-            var result = await _parkMemberRepository.GetParkMemberByLicensePlateAsync(licensePlate);
-            return MapEntityToDTO(result);   
+            var account = new AccountCreateDTO();
+            account.UserName = createDTO.UserName;
+            account.Password = createDTO.Password;
+            account.RewritePassword = createDTO.Password;
+            account.CompanyId = companyId;
+            account.AccountId = new Guid();
+            var parkMemberEntity = MapCreateDTOToEntity(createDTO);
+            parkMemberEntity.AccountId = account.AccountId;
+            var newParkMember = await base.InsertAsync(createDTO, companyId);
+            var newAccount = await _accountService.InsertAsync(account, companyId);
+            if(newAccount != null)
+            {
+                throw new Exception("Lỗi khi tạo Account cho ParkMember");
+            } 
+            return newParkMember;
         }
 
-        /// <summary>
-        /// Hàm lấy thông tin khách hàng theo phân trang 
-        /// </summary>
-        /// <param name="page"></param>
-        /// <param name="pageSize"></param>
-        /// <returns></returns>
-        public async Task<List<ParkMemberDTO>> GetParkMembersByPaginationAsync(int page, int pageSize)
-        {
-            var parkMembers = await _parkMemberRepository.GetParkMembersPaginationAsync(page - 1, pageSize); 
-            var parkMemberDTOs = parkMembers.Select(parkMember => MapEntityToDTO(parkMember)).ToList();
-            return parkMemberDTOs;
-        }
 
 
-        
-        
     }
 }

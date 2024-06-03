@@ -8,6 +8,13 @@ import { employeeConstants } from "./EmployeeConstants";
 import { useHelperStore } from "@/stores/HelperStore";
 import { useUserStore } from "@/stores/UserStore";
 import { mergeWith } from "lodash-es";
+import {
+  storage,
+  firebaseRef,
+  timeStamp,
+  uploadBytes,
+  getDownloadURL,
+} from "@/services/FireBase";
 const { request } = useAxios();
 const helperStore = useHelperStore();
 const userStore = useUserStore();
@@ -109,6 +116,11 @@ const isShowEmployeeForm = ref(false);
 const employeeConstantsLanguage = computed(() => {
   return employeeConstants[helperStore.language.code];
 });
+
+const exportExcelOptions = [
+  { name: "Trang hiện tại", value: 0 },
+  { name: "Tất cả các trang", value: 1 },
+];
 
 /**
  * Hàm bỏ chọn tất cả những nhân viên đã chọn
@@ -220,7 +232,7 @@ async function getEmployeeAsync() {
   try {
     isGettingEmployeeData.value = true;
     const response = await request({
-      url: `Employees/${userStore.companyId}?page=${employeePaging.value.page}&pageSize=${employeePaging.value.pageSize}&employeeProperty=${employeePaging.value.searchProperty}`,
+      url: `Employees?page=${employeePaging.value.page}&pageSize=${employeePaging.value.pageSize}&searchProperty=${employeePaging.value.searchProperty}`,
       method: "get",
     });
     isGettingEmployeeData.value = false;
@@ -250,28 +262,46 @@ async function getEmployeeAsync() {
  */
 async function createOneEmployeeAsync(toast, languageCode) {
   try {
-    const data = convertEmployeeFormDataToFormData(formModeEnum.Create);
+    const data = processEmployeeFormData(formModeEnum.Create);
     if (!validateEmployeeFormData(data)) {
       return;
     }
-    // const response = await request(
-    //   {
-    //     url: `Employees/${userStore.companyId}`,
-    //     method: "post",
-    //     data,
-    //     headers: {
-    //       "Content-Type": "multipart/form-data",
-    //     },
-    //   },
-    //   toast
-    // );
-    // await getEmployeeAsync();
-    // const toastContent = employeeConstantsLanguage.value.Toast;
-    // toast.add(toastContent.ActionEmployeeSuccess(toastContent[formMode.value]));
+    if (employeeFormData.value.AvatarFile) {
+      const imageNameSplit = employeeFormData.value.AvatarFile.name.split(".");
+      const extension = imageNameSplit.pop();
+      const name = imageNameSplit.join(".");
+      const imageStorageRef = firebaseRef(
+        storage,
+        `images/${name + new Date().getTime() + "." + extension}`
+      );
+
+      uploadBytes(imageStorageRef, data.AvatarFile)
+        .then((snapshot) => {
+          console.log("Uploaded a blob or file!", snapshot);
+          getDownloadURL(snapshot.ref).then((downloadURL) => {
+            console.log(downloadURL);
+            data.AvatarLink = downloadURL;
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+    const response = await request(
+      {
+        url: `Employees`,
+        method: "post",
+        data,
+      },
+      toast
+    );
+    await getEmployeeAsync();
+    const toastContent = employeeConstantsLanguage.value.Toast;
+    toast.add(toastContent.ActionEmployeeSuccess(toastContent[formMode.value]));
     formError.value = {};
   } catch (error) {
     console.log(error);
-    if (error.response.status === 400) {
+    if (error.response?.status === 400) {
     }
   }
 }
@@ -284,19 +314,15 @@ async function createOneEmployeeAsync(toast, languageCode) {
  */
 async function updateOneEmployeeAsync(toast, languageCode) {
   try {
-    const data = convertEmployeeFormDataToFormData(formModeEnum.Update);
-    console.log(data);
+    const data = processEmployeeFormData(formModeEnum.Update);
     if (!validateEmployeeFormData(data)) {
       return;
     }
     const response = await request(
       {
-        url: `Employees/${employeeFormData.value.EmployeeId}/${userStore.companyId}`,
+        url: `Employees/${employeeFormData.value.EmployeeId}`,
         method: "put",
         data,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
       },
       toast
     );
@@ -374,10 +400,66 @@ function convertEmployeeFormDataToFormData(mode) {
 }
 
 /**
+ * Hàm xử lý employeeFormData trước khi gửi cho Backend
+ * @param {Number} mode
+ * Created by: nkmdang 09/04/2024
+ */
+function processEmployeeFormData(mode) {
+  const employeeSendFormData = {
+    ...employeeFormData.value,
+  };
+  const departmentName = employeeSendFormData.DepartmentName;
+  for (let department of departmentData) {
+    if (department.DepartmentName === departmentName) {
+      employeeSendFormData.DepartmentId = department.DepartmentId;
+      break;
+    }
+  }
+  const titleName = employeeSendFormData.TitleName;
+  for (let titleData of titleOptions.value) {
+    if (titleData.TitleName === titleName) {
+      employeeSendFormData.TitleId = titleData.TitleId;
+      break;
+    }
+  }
+
+  if (mode === formModeEnum.Create) {
+    if (employeeSendFormData.DateOfBirth) {
+      employeeSendFormData.DateOfBirth = convertDatePrimeCalendarToDateDB(
+        employeeSendFormData.DateOfBirth
+      );
+    } else {
+      employeeSendFormData.DateOfBirth = null;
+    }
+    if (employeeSendFormData.PICreatedDate) {
+      employeeSendFormData.PICreatedDate = convertDatePrimeCalendarToDateDB(
+        employeeSendFormData.PICreatedDate
+      );
+    } else {
+      employeeSendFormData.PICreatedDate = null;
+    }
+  } else if (mode === formModeEnum.Update) {
+    if (employeeSendFormData.DateOfBirth) {
+      employeeSendFormData.DateOfBirth = convertDateUIToDateDB(
+        employeeSendFormData.DateOfBirth
+      );
+    }
+    if (employeeSendFormData.PICreatedDate) {
+      employeeSendFormData.PICreatedDate = convertDateUIToDateDB(
+        employeeSendFormData.PICreatedDate
+      );
+    }
+  }
+  employeeSendFormData.ModifiedDate = getCurrentTimeString();
+  console.log(employeeSendFormData);
+  return employeeSendFormData;
+}
+
+/**
  * Hàm validate các thông tin nhân viên
  * @returns Boolean
  */
-function validateEmployeeFormData(formData) {
+function validateEmployeeFormData(data) {
   const errorObject = {};
   formError.value = {};
   let isError = false;
@@ -401,17 +483,21 @@ function validateEmployeeFormData(formData) {
       length: 36,
       require: true,
     },
-    PositionName: {
+    TitleName: {
       maxLength: 255,
-      require: false,
+      require: true,
     },
     BankName: {
       maxLength: 255,
-      require: false,
+      require: true,
     },
     BankBranch: {
       maxLength: 255,
       require: false,
+    },
+    BankAccount: {
+      require: true,
+      maxLength: 255,
     },
     PersonalIdentification: {
       regex: /^0[0-9]{9}$/,
@@ -429,6 +515,10 @@ function validateEmployeeFormData(formData) {
       regex: /(84|0[3|5|7|8|9])+([0-9]{8})\b/g,
       require: false,
     },
+    TitleId: {
+      length: 36,
+      require: true,
+    },
   };
 
   for (let field in employeeFieldValidate) {
@@ -438,20 +528,20 @@ function validateEmployeeFormData(formData) {
           ? "MaxLengthAndRequire"
           : "Length";
         errorObject[field] = validateCustomRequireAndMaxlength(
-          formData.get(field),
+          data[field],
           employeeConstantsLanguage.value.formError[field + errorMessageField],
           employeeFieldValidate[field].require
         );
       } else if (key == "regex") {
         if (employeeFieldValidate[field].require) {
           errorObject[field] = validateByRegex(
-            formData.get(field),
+            data[field],
             employeeConstantsLanguage.value.formError[field + "InvalidFormat"],
             employeeFieldValidate[field].regex
           );
-        } else if (formData.get(field)) {
+        } else if (data[field]) {
           errorObject[field] = validateByRegex(
-            formData.get(field),
+            data[field],
             employeeConstantsLanguage.value.formError[field + "InvalidFormat"],
             employeeFieldValidate[field].regex
           );
@@ -459,16 +549,16 @@ function validateEmployeeFormData(formData) {
       }
     }
   }
-  const departmentId = formData.get("DepartmentId");
-  if (departmentId == "undefined") {
+  const departmentId = data["DepartmentId"];
+  if (!departmentId) {
     errorObject.Department =
       employeeConstantsLanguage.value.formError.DepartmentEmty;
   }
-  const dateOfBirth = formData.get("DateOfBirth");
-  if (formData.get("DateOfBirth") != "undefined") {
-    const gender = formData.get("Gender") || 2;
+  const dateOfBirth = data["DateOfBirth"];
+  if (data["DateOfBirth"]) {
+    const gender = data["Gender"] || 2;
     errorObject.DateOfBirth = validateWorkingAge(
-      formData.get("DateOfBirth"),
+      data["DateOfBirth"],
       employeeConstantsLanguage.value.formError.DateOfBirthGenderInvalid[
         gender
       ],
@@ -477,9 +567,9 @@ function validateEmployeeFormData(formData) {
     );
   }
 
-  if (formData.get("PICreatedDate") != "undefined") {
+  if (data["PICreatedDate"]) {
     errorObject.PICreatedDate = validateDateNotMoreThanTargetDate(
-      formData.get("PICreatedDate"),
+      data["PICreatedDate"],
       employeeConstantsLanguage.value.formError.PICreatedDateInfuture
     );
   }
@@ -535,21 +625,25 @@ async function getNewEmployeeCode() {
  *
  * Created By: nkmdang 10/10/2023
  */
-async function exportExcelCurrentPage(page, pageSize, employeeProperty, aRef) {
+async function exportExcelCurrentPage(aRef) {
   // this.employeePropertyExcel = this.employeeProperty;
   try {
-    this.notificationStore.showLoading();
-    const response = await axios.get(
-      `Employees/EmployeesExcel?page=${page}&pageSize=${pageSize}`,
-      {
-        headers: {
-          Authorization: `Bearer ${this.userStore.accessToken}`,
-        },
-        responseType: "blob",
-      }
-    );
+    const response = await request({
+      url: `Employees/EmployeesExcel/${userStore.companyId}?page=${employeePaging.value.page}&pageSize=${employeePaging.value.pageSize}&searchProperty=${employeePaging.value.searchProperty}`,
+      method: "get",
+      responseType: "blob",
+    });
+    // const response = await axios.get(
+    //   `Employees/EmployeesExcel?page=${page}&pageSize=${pageSize}`,
+    //   {
+    //     headers: {
+    //       Authorization: `Bearer ${this.userStore.accessToken}`,
+    //     },
+    //     responseType: "blob",
+    //   }
+    // );
     // Tạo một Blob từ dữ liệu trả về từ API
-    const blob = new Blob([response.data]);
+    const blob = new Blob([response]);
 
     // Tạo URL cho Blob
     const url = window.URL.createObjectURL(blob);
@@ -566,9 +660,7 @@ async function exportExcelCurrentPage(page, pageSize, employeeProperty, aRef) {
     // Giải phóng URL để tránh rò rỉ bộ nhớ
     window.URL.revokeObjectURL(url);
     // console.log(response);
-    this.notificationStore.hideLoading();
   } catch (error) {
-    this.notificationStore.hideLoading();
     console.log(error);
     this.notificationStore.showToastMessage(
       this.resourceLanguage.ToastMessage.CannotExportExcel
@@ -624,6 +716,7 @@ export function EmployeeService() {
     employeeConstantsLanguage,
     paginatorPending,
     formError,
+    exportExcelOptions,
     showEmployeeForm,
     showEmployeeFormConfirmDialog,
     hideEmployeeForm,

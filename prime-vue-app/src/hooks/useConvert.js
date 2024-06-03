@@ -57,11 +57,11 @@ function convertDatePrimeCalendarToDateDB(primeCalendarDate) {
   const hours = dateObj.getHours();
   const minutes = dateObj.getMinutes();
   const seconds = dateObj.getSeconds();
-  return `${year}-${day.toString().padStart(2, "0")}-${month
+  return `${year}-${month.toString().padStart(2, "0")}-${day
     .toString()
-    .padStart(2, "0")} ${hours.toString().padStart(2, "0")}:${minutes
+    .padStart(2, "0")}T${hours.toString().padStart(2, "0")}:${minutes
     .toString()
-    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}Z`;
 }
 
 function convertGenderDBToUIText(gender) {
@@ -94,7 +94,7 @@ function getCurrentTimeString() {
     seconds = "0" + seconds;
   }
 
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
 
 export function useConvert() {

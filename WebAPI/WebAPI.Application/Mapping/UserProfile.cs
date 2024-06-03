@@ -7,10 +7,10 @@ namespace WebAPI.Application
     {
         public UserProfile() 
         {
-            CreateMap<User, UserDTO>();
-            CreateMap<UserDTO, User>();
-            CreateMap<RegisterDTO, User>();
-            CreateMap<ForgotPasswordDTO, User>();
+            CreateMap<Account, AccountDTO>();
+            CreateMap<AccountDTO, Account>();
+            CreateMap<AccountCreateDTO, Account>();
+            CreateMap<AccountUpdateDTO, Account>();
         }    
     }
 }

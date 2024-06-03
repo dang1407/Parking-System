@@ -24,6 +24,12 @@ namespace WebAPI.Application
             return MapEntityToDTO(result);
         }
 
+        public async Task<List<ParkSlotDTO>> GetParkSlotByParkingIdAsync(Guid parkingId)
+        {
+            var result = await _parkSlotRepository.GetParkSlotByParkingIdAsync(parkingId);
+            return result.Select(x => MapEntityToDTO(x)).ToList();   
+        }
+
         /// <summary>
         /// Hàm lấy thông tin bãi đỗ xe theo từng tầng
         /// </summary>

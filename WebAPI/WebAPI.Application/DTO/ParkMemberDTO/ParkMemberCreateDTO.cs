@@ -13,6 +13,14 @@ namespace WebAPI.Application
     {
         public Guid ParkMemberId { get; set; }
 
+        [Required(ErrorMessage = "Username không để trống")]
+        public string UserName { get; set; }  = string.Empty;
+
+        [Required(ErrorMessage = "Password không để trống")]
+        public string Password { get; set; } = string.Empty;
+
+        public string Role = "parkmember";
+
         [Required(ErrorMessage = "Mã khách hàng gửi xe không được để trống.")]
         [RegularExpression(@"PMB-00[0-9]{4}", ErrorMessage = "Mã khách hàng gửi xe phải có định dạng PMB-00abcd với a, b, c, d là các chữ số.")]
         public string ParkMemberCode { get; set; } = string.Empty;
@@ -35,7 +43,6 @@ namespace WebAPI.Application
         [MaxLength(20, ErrorMessage = "Biển số xe không có định dạng như vậy. Vui lòng kiểm tra lại.")]
         public string LicensePlate { get; set; } = string.Empty;
         public string? AvatarLink { get; set; } = string.Empty;
-        public IFormFile? AvatarFile { get; set; }
         public string? Mobile { get; set; } = string.Empty;
         public Gender? Gender { get; set; }
     }

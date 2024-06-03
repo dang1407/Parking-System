@@ -15,6 +15,15 @@ namespace WebAPI.Infrastructure
         {
         }
 
+        public async Task<List<ParkSlot>> GetParkSlotByParkingIdAsync(Guid parkingId)
+        {
+            string sql = "Select * from ParkSlot where ParkingId = @ParkingId;";
+            var param = new DynamicParameters();
+            param.Add("ParkingId", parkingId.ToString());   
+            var result = await Uow.Connection.QueryAsync<ParkSlot>(sql, param, transaction: Uow.Transaction); 
+            return result.ToList(); 
+        }
+
         /// <summary>
         /// Hàm lấy thông tin trạng thái các vị trí để xe theo tầng
         /// </summary>

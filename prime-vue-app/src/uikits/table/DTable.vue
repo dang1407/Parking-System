@@ -8,7 +8,10 @@
       </thead>
       <tbody>
         <tr v-for="element in data">
-          <td v-for="key in element"></td>
+          <td></td>
+          <td v-for="key in element">
+            {{ element[key] }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -17,6 +20,7 @@
 
 <script setup>
 import { ref } from "vue";
+import CheckBox from "primevue/checkbox";
 const data = defineModel("data");
 const tableInf = defineModel("tableInf");
 </script>

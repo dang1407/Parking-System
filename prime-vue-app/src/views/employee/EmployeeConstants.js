@@ -51,8 +51,7 @@ export const employeeConstants = {
       ChooseDepartmentBefore: "Vui lòng chọn đơn vị trước",
     },
     formError: {
-      FullNameMaxLengthAndRequire:
-        "Họ và tên là bắt buộc và không vượt quá 255 kí tự.",
+      FullNameMaxLengthAndRequire: "Họ và tên là bắt buộc.",
       FullNameLength: "Họ và tên không vượt quá 255 kí tự.",
       AddressLength: "Địa chỉ không vượt quá 255 kí tự.",
       PositionNameLength: "Chức danh không vượt quá 255 kí tự.",
@@ -70,6 +69,9 @@ export const employeeConstants = {
       EmployeeCodeInvalidFormat:
         "Mã nhân viên phải có định dạng NV-00abcd, trong đó a, b, c, d là các chữ số.",
       PersonalIdentificationInvalid: "Số CCCD không đúng định dạng.",
+      TitleNameMaxLengthAndRequire: "Chức danh là bắt buộc.",
+      BankAccountMaxLengthAndRequire: "Số tài khoản ngân hàng là bắt buộc.",
+      BankNameMaxLengthAndRequire: "Tên ngân hàng là bắt buộc.",
     },
     listOfEmployeeTitle: "Danh sách nhân viên",
     createButtonText: "Thêm mới",
@@ -158,15 +160,14 @@ export const employeeConstants = {
       ChooseDepartmentBefore: "Please select one department",
     },
     formError: {
-      FullNameMaxLengthAndRequire:
-        "Full name is required and cannot not exceed 255 characters.",
+      FullNameMaxLengthAndRequire: "Full name is required.",
       FullNameLength: "Full name cannot exceed 255 characters.",
+      AddressLength: "Address must not exceed 255 characters.",
       DepartmentEmty: "Department is required.",
       EmployeeCodeInvalidFormat:
         "The employee code must be in the format NV-00abcd, where a, b, c, d are digits.",
       PersonalIdentificationInvalid:
         "Citizen identification number is not in the correct format",
-      AddressLength: "Address must not exceed 255 characters.",
       PositionNameLength: "The title must not exceed 255 characters.",
       BankNameLength: "Bank name must not exceed 255 characters.",
       BankBrachNameLength: "Bank branch must not exceed 255 characters.",
@@ -179,6 +180,9 @@ export const employeeConstants = {
       PICreatedPlaceLength: "The grant must not exceed 255 characters.",
       PICreatedDateInfuture: "The issue date cannot exceed the current date.",
       DepartmentIdEmty: "You have not selected a department",
+      TitleNameMaxLengthAndRequire: "You have not selected a position.",
+      BankAccountMaxLengthAndRequire: "You have not entered bank account.",
+      BankNameMaxLengthAndRequire: "You have not enter bank name.",
     },
     listOfEmployeeTitle: "List of employee",
     createButtonText: "Create new one",

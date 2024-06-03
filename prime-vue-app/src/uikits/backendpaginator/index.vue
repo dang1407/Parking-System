@@ -103,7 +103,7 @@ const disableItem = ref({
 async function caculatePageOptionsAndDisabledItem(numberOfPageParam) {
   await nextTick();
   const currentNumberOfPages = numberOfPageParam || numberOfPages.value;
-  console.log(currentNumberOfPages);
+  // console.log(currentNumberOfPages);
   if (currentNumberOfPages <= 0) {
     throw "Lỗi phân trang";
   }

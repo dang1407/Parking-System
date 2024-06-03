@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
-    //[Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin")]
     public class EmployeesController : BaseCompanyController<EmployeeDTO, EmployeeCreateDTO, EmployeeUpdateDTO>
     {
         private readonly IEmployeeService _employeeService;
@@ -22,23 +22,23 @@ namespace WebAPI.Controllers
             _cloudinaryService = cloudinaryService; 
         }
 
-        [HttpPost]
-        [Route("{companyId}")]
-        public override async Task<IActionResult> InsertAsync( [FromForm] EmployeeCreateDTO employeeCreateDTO, Guid companyId)
-        {
-            Console.WriteLine("Call Employee");
-            if(employeeCreateDTO.AvatarFile != null) 
-            {
-                string imageUrl = _cloudinaryService.UpLoadImageToCloudinaryAsync(employeeCreateDTO.AvatarFile, "Garage");
-                if(string.IsNullOrEmpty(imageUrl)) 
-                {
-                    return BadRequest("Cannot upload image to cloudinary");
-                }
-                employeeCreateDTO.AvatarLink = imageUrl;    
-            }
-            var result = await _employeeService.InsertAsync( employeeCreateDTO, companyId);
-            return Ok(result);  
-        }
+        //[HttpPost]
+        //[Route("{companyId}")]
+        //public override async Task<IActionResult> InsertAsync( [FromForm] EmployeeCreateDTO employeeCreateDTO, Guid companyId)
+        //{
+        //    Console.WriteLine("Call Employee");
+        //    if(employeeCreateDTO.AvatarFile != null) 
+        //    {
+        //        string imageUrl = _cloudinaryService.UpLoadImageToCloudinaryAsync(employeeCreateDTO.AvatarFile, "Garage");
+        //        if(string.IsNullOrEmpty(imageUrl)) 
+        //        {
+        //            return BadRequest("Cannot upload image to cloudinary");
+        //        }
+        //        employeeCreateDTO.AvatarLink = imageUrl;    
+        //    }
+        //    var result = await _employeeService.InsertAsync( employeeCreateDTO, companyId);
+        //    return Ok(result);  
+        //}
 
 
         /// <summary>
@@ -54,47 +54,18 @@ namespace WebAPI.Controllers
             return result;
         }
 
-        //[HttpGet]
-        //[Route("EmployeesExcel")]
-        //public async Task<dynamic> ExportCurrentPageExcelAsync(int page, int pageSize, string? employeeProperty)
-        //{
-        //    List<EmployeeDTO> employees = new List<EmployeeDTO>();
-        //    // Gọi dữ liệu từ trang hiện tại đang xem
-        //    if (string.IsNullOrEmpty(employeeProperty))
-        //    {
-        //        employees = await _employeeService.GetEmployeesByPaginationAsync(page, pageSize);
-        //    }
-        //    else
-        //    {
+        [HttpGet]
+        [Route("EmployeesExcel/{companyId}")]
+        public async Task<dynamic> ExportCurrentPageExcelAsync(int page, int pageSize, string? searchProperty, Guid companyId)
+        {
+            
+            var employees = await BaseCompanyReadOnlyService.GetFilterAsync(page, pageSize, searchProperty, companyId);
+            // Lấy ra dữ liệu excel dạng byte
+            var excelBytes = await _employeeService.ExportEmployeeExcelAsync(employees, page, pageSize);
 
-        //        // Tìm theo mã nhân viên
-        //        var employeeGetByEmployeeCode = await _employeeService.GetEmployeeByEmployeeCodeAsync(employeeProperty);
-        //        if (employeeGetByEmployeeCode != null)
-        //        {
-        //            employees.Add(employeeGetByEmployeeCode);
-        //        }
+            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Danh_sach_nhan_vien.xlsx");
+        }
 
-        //        // Tìm theo tên
-        //        var employeesGetByFullName = await _employeeService.GetEmployeeByFullNameAsync(page, pageSize, employeeProperty);
-        //        if (employeesGetByFullName != null)
-        //        {
-        //            employees.AddRange(employeesGetByFullName);
-        //        }
-
-        //        // Tìm theo số điện thoại
-        //        var employeeGetByMobile = await _employeeService.GetEmployeeByMobileAsync(page, pageSize, employeeProperty);
-        //        if (employeeGetByMobile != null)
-        //        {
-        //            employees.Add(employeeGetByMobile);
-        //        }
-        //    }
-
-        //    // Lấy ra dữ liệu excel dạng byte
-        //    var excelBytes = await _employeeService.ExportEmployeeExcelAsync(employees, page, pageSize  );
-
-        //    return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Danh_sach_nhan_vien.xlsx");
-        //}
-
-
+        
     }
 }

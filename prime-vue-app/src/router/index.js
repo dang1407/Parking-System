@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "@/stores/UserStore";
+import { Role } from "./Role";
 // // Auth Guards
 const requireAuth = async (to, from, next) => {
   const userStore = useUserStore();
@@ -30,12 +31,58 @@ const routes = [
           import(
             /* webPackChunkName: "employee" */ "@/views/employee/EmployeePage.vue"
           ),
+        beforeEnter: (to, from, next) => {
+          const userStore = useUserStore();
+          if (userStore.role != Role.Admin) {
+            next({ name: "Error", params: {} });
+          } else {
+            next();
+          }
+        },
       },
       {
         name: "Garage",
         path: "/garage",
         component: () =>
           import(/* webPackChunkName: "garage" */ "@/views/garage/Garage.vue"),
+      },
+      {
+        name: "Garage Infor",
+        path: "/garage/:parkingId",
+        component: () =>
+          import(/* webPackChunkName: "garage" */ "@/views/garage/Garage.vue"),
+      },
+      {
+        name: "Park Member",
+        path: "/parkmember",
+        component: () =>
+          import(
+            /* webPackChunkName: "parkmember" */ "@/views/parkmember/ParkMemberPage.vue"
+          ),
+        beforeEnter: (to, from, next) => {
+          const userStore = useUserStore();
+          if (userStore.role != Role.Admin) {
+            next({ name: "Error", params: {} });
+          } else {
+            next();
+          }
+        },
+      },
+      {
+        name: "Statistical",
+        path: "/statistical",
+        component: () =>
+          import(
+            /* webPackChunkName: "statistical" */ "@/views/statistical/Statistical.vue"
+          ),
+        beforeEnter: (to, from, next) => {
+          const userStore = useUserStore();
+          if (userStore.role != Role.Admin) {
+            next({ name: "Error", params: {} });
+          } else {
+            next();
+          }
+        },
       },
     ],
     beforeEnter: (to, from, next) => {
@@ -49,12 +96,21 @@ const routes = [
       import(/* webPackChunkName: "login" */ "@/views/login/Login.vue"),
   },
   {
+    name: "Register Page",
+    path: "/register",
+    component: () =>
+      import(
+        /*webPackChunkName: "register" */ "@/views/register/CustomerRegister.vue"
+      ),
+  },
+  {
     name: "Test",
     path: "/test",
     component: () =>
       import(/* webPackChunkName: "login" */ "@/views/test/Test.vue"),
   },
   {
+    name: "Error",
     path: "/:pathMatch(.*)*",
     component: () =>
       import(/* webPackChunkName: "error" */ "@/views/error/ErrorPage.vue"),

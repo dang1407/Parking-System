@@ -29,97 +29,6 @@ namespace WebAPI.Infrastructure
             return result;
         }
 
-        public async Task<int> GetNumParkMembersAsync()
-        {
-            // Tạo câu lệnh SQL
-            string sql = "SELECT COUNT(ParkMemberId) FROM parkmember";
-
-            var resultDB = await Uow.Connection.QueryFirstOrDefaultAsync<int>(sql);
-            return resultDB;
-        }
-
-        
-        public async Task<List<ParkMember>> GetParkMembersPaginationAsync(int page, int pageSize)
-        {
-            
-            // Tạo câu lệnh sql
-            string sql = ParkMemberSQL.GetParkMembersPaginationsSQL(page, pageSize);
-
-            // Thực thi truy vấn
-            var result = await Uow.Connection.QueryAsync<ParkMember>(sql);
-
-            return result.ToList();
-        }
-
-        public async Task<dynamic> IsExistParkMemberAsync(string parkMemberCode)
-        {
-            // Tạo câu lệnh SQL
-            string sql = "SELECT * FROM ParkMember WHERE ParkMemberCode = @ParkMemberCode;";
-            
-            // Tạo dynamic params
-            var param = new DynamicParameters();
-            param.Add("ParkMemberCode", parkMemberCode);
-
-            // Truy vấn
-            var result = await Uow.Connection.QuerySingleOrDefaultAsync<ParkMember>(sql, param);
-            return result;
-
-        }
-
-        #region Chức năng tìm kiếm khách hàng gửi xe
-
-        /// <summary>
-        /// Hàm truy vấn thông tin khách hàng gửi xe theo tên
-        /// </summary>
-        /// <param name="page">Số trang khách hàng trong trang đang xem</param>
-        /// <param name="pageSize">Số khách hàng trong trang</param>
-        /// <param name="parkMemberFullName">Tên khách hàng cần tìm</param>
-        /// <returns>Những khách hàng có tên khớp với tên trong truy vấn</returns>
-        /// Created by: nkmdang 4/1/2023
-        public async Task<List<ParkMember>?> GetParkMemberByFullNameAsync(int page, int pageSize, string parkMemberFullName)
-        {
-            // Tạo câu lệnh SQL
-            string sql = $"SELECT * FROM ParkMember WHERE FullName LIKE '%{parkMemberFullName}%' ORDER BY SUBSTRING_INDEX(FullName, ' ', -1), ParkMemberCode ASC LIMIT @FirstParkMemberIndex, @PageSize;";
-
-            int firstParkMemberIndex = page * pageSize;
-
-            // Tạo param chống SQL Injection
-            var param = new DynamicParameters();
-            param.Add("FullName", parkMemberFullName);
-            param.Add("FirstParkMemberIndex", firstParkMemberIndex);
-            param.Add("PageSize", pageSize);
-            // Truy vấn
-            var result = await Uow.Connection.QueryAsync<ParkMember>(sql, param);
-            return result.ToList();
-        }
-
-        public async Task<ParkMember?> GetParkMemberByMobileAsync(string mobile)
-        {
-            // Tạo câu lệnh SQL
-            string sql = $"SELECT * FROM view_read_parkmembers vp WHERE vp.Mobile = @Mobile";
-
-            // Tạo param 
-            var param = new DynamicParameters();
-            param.Add("Mobile", mobile);
-
-            // Thực hiện truy vấn
-            var result = await Uow.Connection.QuerySingleOrDefaultAsync<ParkMember>(sql, param);
-            return result;
-        }
-
-        public async Task<ParkMember?> GetParkMemberByParkMemberCodeAsync(string parkMemberCode)
-        {
-            // Tạo câu lệnh sql 
-            string sql = "SELECT * FROM ParkMember WHERE ParkMemberCode = @ParkMemberCode;";
-            // Tạo param
-            var param = new DynamicParameters(parkMemberCode);
-            param.Add("ParkMemberCode", parkMemberCode);
-            // Thực thi truy vấn
-            var result = await Uow.Connection.QuerySingleOrDefaultAsync<ParkMember>(sql, param);
-            return result;
-        }
-
-        #endregion
 
         #region Chức năng xuất file excel
         /// <summary>
@@ -256,24 +165,20 @@ namespace WebAPI.Infrastructure
             return excelBytes;
         }
 
-        /// <summary>
-        /// Hàm tìm kiếm khách hàng gửi xe theo biển số xe
-        /// </summary>
-        /// <param name="licensePlate">Biển số xe cần tìm kiếm</param>
-        /// <returns></returns>
-        /// Created by: nkmdang 17/1/2023
-        public Task<ParkMember?> GetParkMemberByLicensePlateAsync(string licensePlate)
+        public async Task<dynamic> IsExistParkMemberAsync(string parkMemberCode)
         {
-            // Tạo câu lệnh SQL
-            string sql = "SELECT * FROM ParkMember WHERE LicensePlate = @LicensePlate;";
-
-            // Tạo param
+            string sql = "SELECT * FROM view_read_parkmembers where ParkMemberCode = @parkMemberCode;";
             var param = new DynamicParameters();
-            param.Add("LicensePlate", licensePlate);
-
-            // Truy vấn
-            var result = Uow.Connection.QuerySingleOrDefaultAsync<ParkMember>(sql, param);
-            return result;
+            param.Add("@parkMemberCode", parkMemberCode);
+            var result = await Uow.Connection.QueryFirstOrDefaultAsync(sql, param, commandType: System.Data.CommandType.StoredProcedure, transaction: Uow.Transaction);
+            if(result == null)
+            {
+                return false;
+            } 
+            else
+            {
+                return true;
+            }
         }
         #endregion
     }

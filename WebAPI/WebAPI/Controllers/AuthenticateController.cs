@@ -21,9 +21,9 @@ namespace WebAPI.Controllers
     [ApiController]
     public class AuthenticateController : ControllerBase  
     {
-        private readonly IUserService _userService;
+        private readonly IAccountService _userService;
         public IConfiguration _configuration;
-        public AuthenticateController(IUserService userService, IConfiguration configuration) 
+        public AuthenticateController(IAccountService userService, IConfiguration configuration) 
         {
             _userService = userService; 
             _configuration = configuration; 
@@ -32,7 +32,7 @@ namespace WebAPI.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult> LoginAsync([FromBody] UserDTO loginDTO)
+        public async Task<ActionResult> LoginAsync([FromBody] AccountDTO loginDTO)
         {
             if (string.IsNullOrEmpty(loginDTO.UserName) || string.IsNullOrEmpty(loginDTO.Password))
             {
@@ -56,12 +56,13 @@ namespace WebAPI.Controllers
 
                     Subject = new ClaimsIdentity(new[]
                     {
-                        new Claim("Id", Guid.NewGuid().ToString()),
+                        new Claim("CompanyId", user.CompanyId.ToString()),
+                        new Claim("AccountId", user.AccountId.ToString()),
                         new Claim(JwtRegisteredClaimNames.Name, user.UserName),
                         new Claim(JwtRegisteredClaimNames.Jti,
                 Guid.NewGuid().ToString()
                 ),
-                        new Claim(ClaimTypes.Role, user.Role)
+                        new Claim(ClaimTypes.Role, user.Role),
                     }),
                     
                     Expires = DateTime.UtcNow.AddMinutes (60),
@@ -127,8 +128,8 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
-        [Route("refresh-token")]
-        public async Task<IActionResult> RefreshToken(TokenModel tokenModel)
+        [Route("refresh-token/{companyId}")]
+        public async Task<IActionResult> RefreshToken(TokenModel tokenModel, Guid companyId )
         {
             if (tokenModel is null)
             {
@@ -149,7 +150,7 @@ namespace WebAPI.Controllers
             string username = principal.Identity.Name;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-            var loginDTO = new UserDTO()
+            var loginDTO = new AccountDTO()
             {
                 UserName = username
             };

@@ -10,15 +10,17 @@ using WebAPI.Application;
 namespace WebAPI.Controllers
 {
     [Authorize(Roles = "admin")]
-    public class ParkMembersController : BaseCompanyReadOnlyController<ParkMemberDTO>
+    public class ParkMembersController : BaseCompanyController<ParkMemberDTO, ParkMemberCreateDTO, ParkMemberUpdateDTO>
     {
         private IParkMemberService _parkMemberService;
         private readonly ICloudinaryService _cloudinaryService;
-        private readonly IMapper Mapper;
-        public ParkMembersController(IParkMemberService parkMemberService, ICloudinaryService cloudinaryService, IMapper mapper) : base(parkMemberService)
+        private readonly IAccountService _userService;
+        
+        public ParkMembersController(IParkMemberService parkMemberService, ICloudinaryService cloudinaryService, IAccountService userService) : base(parkMemberService)
         {
             _parkMemberService = parkMemberService;
             _cloudinaryService = cloudinaryService; 
+            _userService = userService;
         }
 
        
@@ -29,7 +31,7 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <returns>Mã khách hàng gửi xe mới</returns>
         [HttpGet]
-        [Route("NewParkMemberCode")]
+        [Route("NewParkMemberCode/{companyId}")]
         public async Task<IActionResult> GetNewParkMemberCodeAsync( Guid companyId)
         {
             var result = await _parkMemberService.GetNewParkMemberCodeAsync(companyId);  

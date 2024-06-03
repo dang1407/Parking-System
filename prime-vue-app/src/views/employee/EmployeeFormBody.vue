@@ -133,6 +133,124 @@
           {{ formError?.TitleName }}
         </small>
       </div>
+      <!-- Số tài khoản ngân hàng, tên ngân hàng, chi nhánh  -->
+      <div class="flex flex-col sm:flex-row gap-2">
+        <div class="sm:w-64 flex flex-col gap-1">
+          <label class="font-bold" for="bankaccount"
+            >{{ employeeFormLabel.BankAccount }}
+            <span class="text-required text-[1.5rem]">*</span>
+          </label>
+          <InputText
+            :invalid="formError?.BankAccount ? true : false"
+            class="h-basic-input w-[100%]"
+            id="bankaccount"
+            v-model="bankaccount"
+          >
+          </InputText>
+          <small class="text-[red] font-bold" v-show="formError?.BankAccount">{{
+            formError?.BankAccount
+          }}</small>
+        </div>
+        <div class="flex-1 flex flex-col sm:flex-row gap-2">
+          <div class="w-[100%] sm:max-w-64 flex flex-col gap-1">
+            <label class="font-bold" for="bankname"
+              >{{ employeeFormLabel.BankName }}
+              <span class="text-required text-[1.5rem]">*</span>
+            </label>
+            <InputText
+              class="h-basic-input"
+              :invalid="formError?.BankName ? true : false"
+              id="bankname"
+              v-model="bankname"
+            >
+            </InputText>
+            <small class="text-[red] font-bold" v-show="formError?.BankName">{{
+              formError?.BankName
+            }}</small>
+          </div>
+          <div class="w-[100%] sm:max-w-64 flex flex-col gap-1">
+            <label class="font-bold" for="bankbranch"
+              >{{ employeeFormLabel.BankBranch }}
+              <span class="invisible text-[1.5rem]">*</span>
+            </label>
+            <InputText
+              class="h-basic-input"
+              id="bankaccount"
+              v-model="bankbranch"
+            >
+            </InputText>
+            <small
+              class="text-[red] font-bold"
+              v-show="formError?.BankBranch"
+            ></small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Số CCCD, Nơi cấp, Ngày cấp,  -->
+      <div class="flex flex-col sm:flex-row gap-2">
+        <div class="sm:w-64 flex flex-col gap-1">
+          <label
+            class="font-bold"
+            for="employee-full-name"
+            v-tooltip="employeeFormLabel.PersonalIdentificationTooltip"
+            >{{ employeeFormLabel.PersonalIdentification }}</label
+          >
+          <InputText
+            :invalid="formError?.PersonalIdentification ? true : false"
+            class="h-[36px]"
+            id="employee-cccd"
+            v-model="personalIdentification"
+            aria-describedby="employee-full-name-help"
+          />
+          <small
+            class="text-[red] font-bold"
+            v-show="formError?.PersonalIdentification"
+            id="employee-full-name-help"
+            >formError?.PersonalIdentification</small
+          >
+        </div>
+        <div class="flex-1 flex flex-col sm:flex-row gap-2">
+          <div class="w-[100%] sm:max-w-64 flex flex-col gap-1">
+            <label class="font-bold" for="piCreatedPlace">{{
+              employeeFormLabel.PICreatedPlace
+            }}</label>
+            <InputText
+              :invalid="formError?.PICreatedPlace ? true : false"
+              class="h-basic-input"
+              inputId="piCreatedPlace"
+              v-model="piCreatedPlace"
+              dateFormat="dd/mm/yy"
+              showButtonBar
+            />
+            <small
+              class="text-[red] font-bold"
+              v-show="formError?.PICreatedPlace"
+            ></small>
+          </div>
+          <div class="w-[100%] sm:max-w-64 flex flex-col gap-1">
+            <label class="font-bold" for="picreateddate">{{
+              employeeFormLabel.PICreatedDate
+            }}</label>
+            <Calendar
+              :invalid="formError?.PICreatedDate ? true : false"
+              class="h-basic-input calendar-container"
+              inputId="picreateddate"
+              v-model="piCreatedDate"
+              dateFormat="dd/mm/yy"
+              showButtonBar
+              showIcon
+              :showOnFocus="false"
+            />
+            <small
+              class="text-[red] font-bold"
+              v-show="formError?.PICreatedDate"
+              id="employee-full-name-help"
+              >{{ formError?.PICreatedDate }}</small
+            >
+          </div>
+        </div>
+      </div>
       <div class="flex flex-col sm:flex-row gap-2">
         <!-- Giới tính -->
         <div class="sm:w-64">
@@ -229,110 +347,6 @@
           </small>
         </div>
       </div>
-      <!-- Số CCCD, Nơi cấp, Ngày cấp,  -->
-      <div class="flex flex-col sm:flex-row gap-2">
-        <div class="sm:w-64 flex flex-col gap-1">
-          <label
-            class="font-bold"
-            for="employee-full-name"
-            v-tooltip="employeeFormLabel.PersonalIdentificationTooltip"
-            >{{ employeeFormLabel.PersonalIdentification }}</label
-          >
-          <InputText
-            :invalid="formError?.PersonalIdentification ? true : false"
-            class="h-[36px]"
-            id="employee-cccd"
-            v-model="personalIdentification"
-            aria-describedby="employee-full-name-help"
-          />
-          <small
-            class="text-[red] font-bold"
-            v-show="formError?.PersonalIdentification"
-            id="employee-full-name-help"
-            >formError?.PersonalIdentification</small
-          >
-        </div>
-        <div class="flex-1 flex flex-col sm:flex-row gap-2">
-          <div class="w-[100%] sm:max-w-64 flex flex-col gap-1">
-            <label class="font-bold" for="piCreatedPlace">{{
-              employeeFormLabel.PICreatedPlace
-            }}</label>
-            <InputText
-              :invalid="formError?.PICreatedPlace ? true : false"
-              class="h-basic-input"
-              inputId="piCreatedPlace"
-              v-model="piCreatedPlace"
-              dateFormat="dd/mm/yy"
-              showButtonBar
-            />
-            <small
-              class="text-[red] font-bold"
-              v-show="formError?.PICreatedPlace"
-            ></small>
-          </div>
-          <div class="w-[100%] sm:max-w-64 flex flex-col gap-1">
-            <label class="font-bold" for="picreateddate">{{
-              employeeFormLabel.PICreatedDate
-            }}</label>
-            <Calendar
-              :invalid="formError?.PICreatedDate ? true : false"
-              class="h-basic-input calendar-container"
-              inputId="picreateddate"
-              v-model="piCreatedDate"
-              dateFormat="dd/mm/yy"
-              showButtonBar
-              showIcon
-              :showOnFocus="false"
-            />
-            <small
-              class="text-[red] font-bold"
-              v-show="formError?.PICreatedDate"
-              id="employee-full-name-help"
-              >{{ formError?.PICreatedDate }}</small
-            >
-          </div>
-        </div>
-      </div>
-      <div class="flex xs:flex-col sm:flex-row gap-2">
-        <div class="sm:w-64 flex flex-col gap-1">
-          <label class="font-bold" for="bankaccount">{{
-            employeeFormLabel.BankAccount
-          }}</label>
-          <InputText
-            class="h-basic-input"
-            id="bankaccount"
-            v-model="bankaccount"
-          >
-          </InputText>
-          <small v-show="formError?.BankAccount"></small>
-        </div>
-        <div class="flex flex-col gap-1">
-          <label class="font-bold" for="bankname">{{
-            employeeFormLabel.BankName
-          }}</label>
-          <InputText class="h-basic-input" id="bankname" v-model="bankname">
-          </InputText>
-          <small
-            class="text-[red] font-bold"
-            v-show="formError?.BankName"
-          ></small>
-        </div>
-        <div class="flex flex-col gap-1">
-          <label class="font-bold" for="bankbranch">{{
-            employeeFormLabel.BankBranch
-          }}</label>
-          <InputText
-            class="h-basic-input"
-            id="bankaccount"
-            v-model="bankbranch"
-          >
-          </InputText>
-          <small
-            class="text-[red] font-bold"
-            v-show="formError?.BankBranch"
-          ></small>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -390,7 +404,7 @@ const genderLabel = computed(() => {
 
 const titleDropdownOptions = computed(() => {
   const emptyArray = [];
-  console.log(department.value);
+
   for (let i = 0; i < props.titleOptions.length; i++) {
     if (props.titleOptions[i].DepartmentName == department.value) {
       emptyArray.push(props.titleOptions[i].TitleName);

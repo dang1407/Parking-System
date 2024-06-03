@@ -79,7 +79,6 @@ function validateEmail(data, errorMessage, emailRegex) {
  * @param {*} errorMessage
  */
 function validateByRegex(data, errorMessage, regex) {
-  console.log(data, errorMessage, regex);
   if (!regex.test(data)) {
     return errorMessage;
   } else {
@@ -113,6 +112,7 @@ function validateWorkingAge(
   const nowDate = new Date();
   const dataDate = new Date(dateString);
   const age = nowDate.getFullYear() - dataDate.getFullYear();
+  console.log(dateString, dataDate);
   if (!(workingStartDate <= age && age <= workingEndAge)) {
     return errorMessage;
   } else return "";

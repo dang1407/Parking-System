@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Security.Claims;
 using WebAPI.Application;
 using WebAPI.Domain;
 
 namespace WebAPI.Controllers
 {
+    
     public class BaseCompanyController<TDTO, TCreateDTO, TUpdateDTO> : BaseCompanyReadOnlyController<TDTO>
     {
         protected readonly IBaseCompanyService<TDTO, TCreateDTO, TUpdateDTO> BaseCompanyService;
@@ -23,10 +25,11 @@ namespace WebAPI.Controllers
         /// <returns>Thông tin Entity tạo mới nếu thành công</returns>
         /// Created by: nkmdang (21/09/2023)
         [HttpPost]
-        [Route("{companyId}")]
-        public virtual async Task<IActionResult> InsertAsync([FromBody] TCreateDTO createDTO, Guid companyId)
+        [Route("")]
+        [Authorize]
+        public virtual async Task<IActionResult> InsertAsync([FromBody] TCreateDTO createDTO)
         {
-
+            Guid companyId = Guid.Parse( HttpContext.User.FindFirstValue("CompanyId"));
             var errors = GetModelStateError(ModelState);
             if(errors != null)
             {
@@ -38,8 +41,10 @@ namespace WebAPI.Controllers
 
         [HttpPost]
         [Route("insertMany")]
-        public async Task<IActionResult> InsertManyAsync([FromBody] List<TCreateDTO> createDTOs, Guid companyId)
+        [Authorize]
+        public async Task<IActionResult> InsertManyAsync([FromBody] List<TCreateDTO> createDTOs)
         {
+            Guid companyId = Guid.Parse(HttpContext.User.FindFirstValue("CompanyId"));
             var results = await BaseCompanyService.InsertManyAsync(createDTOs, companyId);
             return Ok(results);
         }
@@ -51,9 +56,11 @@ namespace WebAPI.Controllers
         /// <returns>Thông tin của TDTO sau khi đã thay đổi</returns>
         /// Created by: nkmdang (20/09/2023)
         [HttpPut]
-        [Route("{companyId}/{id}")]
-        public virtual async Task<IActionResult> UpdateAsync( Guid id, [FromBody] TUpdateDTO updateDTO, Guid companyId)
+        [Route("{id}")]
+        [Authorize]
+        public virtual async Task<IActionResult> UpdateAsync( Guid id, [FromBody] TUpdateDTO updateDTO)
         {
+            Guid companyId = Guid.Parse(HttpContext.User.FindFirstValue("CompanyId"));
             var errors = GetModelStateError(ModelState);
             if (errors != null)
             {
@@ -71,9 +78,11 @@ namespace WebAPI.Controllers
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
         [HttpDelete]
-        [Route("{companyId}/{id}")]
-        public async Task<int> DeleteAsync(Guid id, Guid companyId)
+        [Route("{id}")]
+        [Authorize]
+        public async Task<int> DeleteAsync(Guid id)
         {
+            Guid companyId = Guid.Parse(HttpContext.User.FindFirstValue("CompanyId"));
             var result = await BaseCompanyService.DeleteAsync(id, companyId);
             return result;
         }
@@ -86,9 +95,11 @@ namespace WebAPI.Controllers
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
         [HttpDelete]
-        [Route("{companyId}")]
-        public async Task<IActionResult> DeleteManyAsync(List<Guid> ids, Guid companyId)
+        [Route("")]
+        [Authorize]
+        public async Task<IActionResult> DeleteManyAsync(List<Guid> ids)
         {
+            Guid companyId = Guid.Parse(HttpContext.User.FindFirstValue("CompanyId"));
             var result = await BaseCompanyService.DeleteManyAsync(ids, companyId);
             var response = new
             {

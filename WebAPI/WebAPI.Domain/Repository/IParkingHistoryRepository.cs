@@ -8,12 +8,10 @@ namespace WebAPI.Domain
 {
     public interface IParkingHistoryRepository : IBaseCompanyRepository<ParkingHistory>
     {
-        Task<List<ParkingHistory>?> FindParkingHistoryByVehicleOutDateAsync(string date, string month, string year);
-        Task<List<ParkingHistory>?> FindParkingHistoryByProperties(string propertyValues, string[] propertyNames);
 
-        Task<List<ParkingHistory>> FindParkingVehicleAsync(string? licensePlate, string? parkSlotCode);
-        Task<ParkingHistory> EnterVehicleToGarageAsync(ParkingHistory parkingHistory, ParkSlot parkSlot);
-        Task<ParkingHistory> EnterVehicleOutGarageAsync(ParkingHistory parkingHistory);
+        Task<ParkingHistory?> FindParkingVehicleAsync(string? licensePlate, Guid companyId);
+        Task<ParkingHistory> EnterVehicleToGarageAsync(ParkingHistory parkingHistory, Guid companyId);
+        Task<ParkingHistory> EnterVehicleOutGarageAsync(ParkingHistory parkingHistory, Guid companyId);
 
         
     }

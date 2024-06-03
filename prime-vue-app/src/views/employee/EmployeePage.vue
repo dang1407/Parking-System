@@ -1,6 +1,6 @@
 <template>
-  <div class="w-[100%] h-[100%]">
-    <div class="h-[36px] flex justify-between items-center">
+  <div class="w-[100%] h-[100%] flex flex-col">
+    <div class="h-[36px] flex justify-between items-center mb-2">
       <h1 class="font-semibold text-[1rem] sm:text-[1.5rem]">
         {{ employeeConstantsLanguage.listOfEmployeeTitle }}
       </h1>
@@ -11,7 +11,7 @@
         :label="employeeConstantsLanguage.createButtonText"
       ></Button>
     </div>
-    <div class="card w-[100%] h-[100%] bg-white">
+    <div class="card w-[100%] flex-1 bg-white">
       <!-- Toolbar thực hiện hàng loạt + tìm kiếm + xuất file excel -->
       <Toolbar class="employee-toolbar h-[44px] mb-[4px]">
         <template #start>
@@ -49,37 +49,28 @@
                 </InputIcon>
                 <InputText
                   class="h-[36px]"
-                  v-model="employeePaging.employeeSearchProperty"
+                  v-model="employeePaging.searchProperty"
                   placeholder="Search"
                   autofocus
                   @keydown.enter="getEmployeeAsync"
                 />
               </IconField>
             </div>
+            <div @click="">
+              <Dropdown :options="exportExcelOptions" option-label="name">
+                <template #value="slotProps">
+                  <div class="!text-[black]">Excel</div>
+                </template>
+                <template #dropdownicon>
+                  <i
+                    class="text-2xl pi pi-file-export pi-click-icon text-[black]"
+                  ></i>
+                </template>
+              </Dropdown>
+              <a href="" class="invisible" ref="aRef"></a>
+            </div>
             <div @click="getEmployeeAsync">
               <i class="text-2xl pi-click-icon pi pi-replay"></i>
-            </div>
-            <div>
-              <a href="" class="invisible" ref="aRef"></a>
-              <div @click="(e) => showExportExcelOption(e)">
-                <i
-                  v-tooltip.bottom="
-                    employeeConstantsLanguage.exportExcelFileTooltip
-                  "
-                  class="text-2xl pi pi-file-export pi-click-icon"
-                ></i>
-              </div>
-              <div
-                class="fixed"
-                :style="{
-                  right: `${excelListBoxPosition.x}px`,
-                  top: `${excelListBoxPosition.y}px`,
-                }"
-              >
-                <div class="absolute">
-                  <Listbox></Listbox>
-                </div>
-              </div>
             </div>
           </div>
         </template>
@@ -115,7 +106,10 @@
                   :columnStyle="columnData.headerStyle"
                 >
                   <template #body="data">
-                    <div class="text-wrap" :class="columnData.tdStyle">
+                    <div
+                      class="text-wrap overflow-hidden"
+                      :class="columnData.tdStyle"
+                    >
                       {{ data.data[columnData.field] }}
                     </div>
                   </template>
@@ -274,6 +268,7 @@ import InputIcon from "primevue/inputicon";
 import IconField from "primevue/iconfield";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
+import Dropdown from "primevue/dropdown";
 import ProgressSpinner from "primevue/progressspinner";
 import BackEndPaginator from "@/uikits/backendpaginator/index.vue";
 import EmployeeFormBody from "./EmployeeFormBody.vue";
@@ -320,6 +315,7 @@ const {
   employeeTableInf,
   paginatorPending,
   formError,
+  exportExcelOptions,
   showEmployeeForm,
   showEmployeeFormConfirmDialog,
   hideEmployeeForm,

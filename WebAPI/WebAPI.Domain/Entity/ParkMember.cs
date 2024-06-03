@@ -22,6 +22,7 @@ namespace WebAPI.Domain
         public string? AvatarLink { get; set; } = string.Empty;
         public string? Mobile { get; set; } = string.Empty;
         public Gender? Gender { get; set; } 
+        public Guid AccountId { get; set; } 
         public Guid GetId()
         {
             return ParkMemberId;    

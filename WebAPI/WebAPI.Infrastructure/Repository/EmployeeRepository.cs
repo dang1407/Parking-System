@@ -59,20 +59,6 @@ namespace WebAPI.Infrastructure
             return result.ToList();
         }
 
-        /// <summary>
-        /// Hàm lấy ra số nhân viên trong database
-        /// </summary>
-        /// <returns>Số nhân viên hiện có trong database</returns>
-        /// Created by: nkmdang (26/09/2023)
-        public async Task<int> GetNumEmployeesAsync()
-        {
-            // Tạo câu lệnh SQL
-            string sql = "SELECT COUNT(EmployeeId) FROM employee e";
-
-            var resultDB = await Uow.Connection.QueryFirstOrDefaultAsync<int>(sql);
-            return resultDB;
-        }
-
 
         #region Chức năng tìm kiếm nhân viên
         /// <summary>
@@ -151,8 +137,8 @@ namespace WebAPI.Infrastructure
         public async Task<byte[]> ExportEmployeeExcelAsync(List<Employee> employees, int page, int pageSize)
         {
             // Lấy ra DatePattern từ CSDL
-            string sql = "SELECT DatePattern FROM Config c, DateConfiguration d WHERE c.DateConfigurationId = d.DateConfigurationId";
-            string datePattern = await Uow.Connection.QueryFirstOrDefaultAsync<string>(sql);
+            //string sql = "SELECT DatePattern FROM Config c, DateConfiguration d WHERE c.DateConfigurationId = d.DateConfigurationId";
+            //string datePattern = await Uow.Connection.QueryFirstOrDefaultAsync<string>(sql);
 
 
             // Tạo ExcelPackage
@@ -248,10 +234,10 @@ namespace WebAPI.Infrastructure
                 {
                     workSheet.Cells[recordIndex, 4].Value = "Khác";
                 }
-                workSheet.Cells[recordIndex, 5].Value = employee.DateOfBirth.HasValue ? employee.DateOfBirth.Value.ToString(datePattern) : "";
+                workSheet.Cells[recordIndex, 5].Value = employee.DateOfBirth.HasValue ? employee.DateOfBirth.Value.ToString("dd/MM/yyyy") : "";
 
                 workSheet.Cells[recordIndex, 8].Value = employee.PersonalIdentification;
-                workSheet.Cells[recordIndex, 9].Value = employee.PICreatedDate.HasValue ? employee.DateOfBirth.Value.ToString(datePattern) : "";
+                workSheet.Cells[recordIndex, 9].Value = employee.PICreatedDate.HasValue ? employee.DateOfBirth.Value.ToString("dd/MM/yyyy") : "";
                 workSheet.Cells[recordIndex, 10].Value = employee.PICreatedPlace;
                 workSheet.Cells[recordIndex, 11].Value = employee.Address;
                 workSheet.Cells[recordIndex, 13].Value = employee.Mobile;
@@ -298,10 +284,7 @@ namespace WebAPI.Infrastructure
             return excelBytes;
         }
 
-        public Task<List<Employee>> GetEmployeesPaginationAsync(int page, int pageSize)
-        {
-            throw new NotImplementedException();
-        }
+    
 
         public Task<List<Employee>> GetByListIdAsync(List<Guid> ids)
         {

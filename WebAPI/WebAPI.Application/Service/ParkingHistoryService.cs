@@ -20,18 +20,18 @@ namespace WebAPI.Application
             _parkingHistoryRepository = parkingHistoryRepository;      
         }
 
-        public async Task<ParkingHistoryDTO> EnterVehicleOutGarageAsync(ParkingHistoryCreateDTO parkingHistoryCreateDTO)
+        public async Task<ParkingHistoryDTO> EnterVehicleOutGarageAsync(ParkingHistoryCreateDTO parkingHistoryCreateDTO, Guid companyId)
         {
             var parkSlot = Mapper.Map<ParkSlot>(parkingHistoryCreateDTO);
             var parkingHistory = Mapper.Map<ParkingHistory>(parkingHistoryCreateDTO);
-            var existVehicle = await FindParkingVehicleAsync(parkingHistory.LicensePlate, null);
+            var existVehicle = await FindParkingVehicleAsync(parkingHistory.LicensePlate, companyId);
 
-            if (existVehicle.Count == 0)
+            if (existVehicle == null)
             {
                 throw new NotFoundException("Xe này hiện đang không có ở trong bãi đỗ xe. Vui lòng kiểm tra lại.", 404);
             }
 
-            var result = await _parkingHistoryRepository.EnterVehicleOutGarageAsync(parkingHistory);
+            var result = await _parkingHistoryRepository.EnterVehicleOutGarageAsync(parkingHistory, companyId);
             return MapEntityToDTO(result);
         }
 
@@ -42,7 +42,7 @@ namespace WebAPI.Application
         /// <param name="parkingHistoryCreateDTO">Thông tin nhập xe vào bãi, bao gồm thông tin vị trí gửi xe để cập nhật trạng thái</param>
         /// <returns></returns>
         /// Created by: nkmdang 18/1/2024
-        public async Task<ParkingHistoryDTO> EnterVehicleToGarageAsync( ParkingHistoryCreateDTO parkingHistoryCreateDTO)
+        public async Task<ParkingHistoryDTO> EnterVehicleToGarageAsync( ParkingHistoryCreateDTO parkingHistoryCreateDTO, Guid companyId )
         {
             parkingHistoryCreateDTO.CreatedDate ??= DateTime.Now;
             parkingHistoryCreateDTO.CreatedBy ??= "nkmdang";
@@ -53,51 +53,22 @@ namespace WebAPI.Application
                 parkingHistory.SetId(Guid.NewGuid());
             }
 
-            var existVehicle = await FindParkingVehicleAsync(parkingHistory.LicensePlate, null);
+            var existVehicle = await FindParkingVehicleAsync(parkingHistory.LicensePlate, companyId);
 
-            if (existVehicle.Count > 0 && existVehicle[0].Vehicle > 0) 
+            if (existVehicle != null) 
             {
                 throw new ConflictException("Xe này hiện đang có ở trong bãi đỗ xe. Vui lòng kiểm tra lại.",409);
             }
 
-            var result = await _parkingHistoryRepository.EnterVehicleToGarageAsync(parkingHistory, parkSlot);
+            var result = await _parkingHistoryRepository.EnterVehicleToGarageAsync(parkingHistory, companyId);
             return MapEntityToDTO(result);   
         }
 
-        public async Task<List<ParkingHistoryDTO>?> FindParkingHistoryByDateTimeAsync(string date, string month, string year)
+        public async Task<ParkingHistoryDTO> FindParkingVehicleAsync(string? licensePlate, Guid companyId)
         {
-            var result = await _parkingHistoryRepository.FindParkingHistoryByVehicleOutDateAsync(date, month, year);
-            return result.Select(parkingHistory => MapEntityToDTO(parkingHistory)).ToList();
+            var parkingHistory = await _parkingHistoryRepository.FindParkingVehicleAsync(licensePlate, companyId);
+            ParkingHistoryDTO result = MapEntityToDTO(parkingHistory);
+            return result;
         }
-
-        public Task<List<ParkingHistoryDTO>?> FindParkingHistoryByProperties(string propertyValues, string[] propertyNames)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<ParkingHistoryDTO>?> FindParkingHistoryByVehicleOutDateAsync(string date, string month, string year)
-        {
-            var result = await _parkingHistoryRepository.FindParkingHistoryByVehicleOutDateAsync(date, month, year);
-            return result.Select(parkingHistory => MapEntityToDTO(parkingHistory)).ToList();
-        }
-
-        public async Task<List<ParkingHistoryDTO>> FindParkingVehicleAsync(string? licensePlate, string? parkSlotCode)
-        {
-            Console.WriteLine(licensePlate);
-            if(!string.IsNullOrEmpty(licensePlate) && string.IsNullOrEmpty(parkSlotCode)) 
-            { 
-                var result = await _parkingHistoryRepository.FindParkingVehicleAsync(licensePlate, null);
-                return result.Select(parkingHistory => MapEntityToDTO(parkingHistory)).ToList();
-            }
-
-            if (!string.IsNullOrEmpty(parkSlotCode) && string.IsNullOrEmpty(licensePlate))
-            {
-                var result = await _parkingHistoryRepository.FindParkingVehicleAsync(licensePlate, parkSlotCode);
-                return result.Select(parkingHistory => MapEntityToDTO(parkingHistory)).ToList();
-            }
-            return [];
-        }
-
-        
     }
 }

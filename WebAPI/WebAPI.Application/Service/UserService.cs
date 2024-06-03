@@ -9,7 +9,7 @@ using WebAPI.Domain;
 
 namespace WebAPI.Application
 {
-    public class UserService : BaseCompanyService<User, UserDTO, RegisterDTO, ForgotPasswordDTO>, IUserService
+    public class UserService : BaseCompanyService<Account, AccountDTO, RegisterDTO, ForgotPasswordDTO>, IUserService
     {
         private readonly IUserRepository _userRepository;   
         public UserService(IUserRepository userRepository, IMapper mapper) : base(userRepository, mapper)
@@ -17,16 +17,22 @@ namespace WebAPI.Application
             _userRepository = userRepository;
         }
 
-        public Task ForgotPassWordAsync(ForgotPasswordDTO forgotPasswordDTO)
+        public async Task ForgotPassWordAsync(ForgotPasswordDTO forgotPasswordDTO)
         {
-            throw new NotImplementedException();
+            //var user = MapUpdateDTOToEntity(forgotPasswordDTO);
+            //var result = await _userRepository.UpdateAsync(user);
+            //return result;
+            throw new NotImplementedException();    
         }
 
-        public Task RegisterAsync(RegisterDTO registerDTO)
+        public async Task<int> RegisterAsync(RegisterDTO registerDTO, Guid companyId)
         {
-            throw new NotImplementedException();
+            var user = MapCreateDTOToEntity(registerDTO);
+            user.CompanyId = companyId;
+            var result = await _userRepository.RegisterAsync(user);
+            return result;
         }
-        public async Task<UserDTO?> FindAccountAsync(UserDTO loginDTO)
+        public async Task<AccountDTO?> FindAccountAsync(AccountDTO loginDTO)
         {
             // Tìm thông tin tài khoản trong db
             var findAccount = await _userRepository.FindAccountAsync(loginDTO.UserName);

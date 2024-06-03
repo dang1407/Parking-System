@@ -1,17 +1,22 @@
 export const SIDEBAR_MENU_ITEMS = {
   SIDEBAR_ROUTE: [
     {
-      label: "Home",
       items: [{ icon: "pi pi-fw pi-home", to: "/" }],
     },
     {
-      label: "Manage",
       items: [
-        { label: "Nhân viên", icon: "pi pi-fw pi-users", to: "/employee" },
+        { icon: "pi pi-fw pi-users", to: "/employee" },
         {
-          label: "Bãi đỗ xe",
           icon: "pi pi-fw pi-car",
           to: "/garage",
+        },
+        {
+          icon: "pi pi-user",
+          to: "/parkmember",
+        },
+        {
+          icon: "pi pi-chart-bar",
+          to: "/statistical",
         },
       ],
     },
@@ -28,6 +33,12 @@ export const SIDEBAR_MENU_ITEMS = {
           { label: "Nhân viên" },
           {
             label: "Bãi đỗ xe",
+          },
+          {
+            label: "Khách hàng gửi xe",
+          },
+          {
+            label: "Thống kê",
           },
         ],
       },
@@ -47,6 +58,12 @@ export const SIDEBAR_MENU_ITEMS = {
           { label: "Employee" },
           {
             label: "Park",
+          },
+          {
+            label: "Park Member",
+          },
+          {
+            label: "Statistical",
           },
         ],
       },

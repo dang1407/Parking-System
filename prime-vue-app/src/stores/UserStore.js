@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
-import axios from "@/services/axios";
+import axios from "axios";
 import { useRouter } from "vue-router";
-
+import { useAxios } from "@/hooks/useAxios";
 export const useUserStore = defineStore("userStore", {
   state: () => ({
     isShowProgress: false,
@@ -20,8 +20,21 @@ export const useUserStore = defineStore("userStore", {
       await reloginAsync();
       try {
         this.isShowProgress = true;
-
-        const response = await axios.post("Authenticate/login", this.loginData);
+        const { request } = useAxios();
+        // const response = await axios.post("Authenticate/login", this.loginData);
+        // const response = await request({
+        //   url: "Authenticate/login",
+        //   method: "post",
+        //   data: this.loginData,
+        // });
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_API}/Authenticate/relogin`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+            },
+          }
+        );
         this.isLogined = true;
         this.accessToken = response.data.AccessToken;
         localStorage.setItem("accessToken", response.data.AccessToken);
@@ -38,17 +51,22 @@ export const useUserStore = defineStore("userStore", {
      * @returns
      */
     async reloginAsync() {
+      console.log("relogin");
       try {
+        console.log(localStorage.getItem("accessToken"));
         if (localStorage.getItem("accessToken")) {
           this.isShowProgress = true;
-          const response = await axios.get("Authenticate/relogin", {
+          const { request } = useAxios();
+          const response = await request({
+            url: "Authenticate/relogin",
+            method: "get",
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              Authorization: `Bearer ${this.accessToken}`,
             },
           });
-
+          console.log(response);
           this.isLogined = true;
-          this.role = response.data[0];
+          this.role = response[0];
           this.accessToken = localStorage.getItem("accessToken");
           // console.log(this.accessToken);
           this.isShowProgress = false;
@@ -57,6 +75,7 @@ export const useUserStore = defineStore("userStore", {
         }
       } catch (error) {
         this.isShowProgress = false;
+        console.log(error);
       }
     },
 

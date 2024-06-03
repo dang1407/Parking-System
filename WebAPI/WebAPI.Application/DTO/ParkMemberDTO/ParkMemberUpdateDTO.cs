@@ -21,7 +21,6 @@ namespace WebAPI.Application
         public string? Address { get; set; } = string.Empty;
         public string LicensePlate { get; set; } = string.Empty;
         public string? AvatarLink { get; set; } = string.Empty;
-        public IFormFile? AvatarFile { get; set; }
         public string? Mobile { get; set; } = string.Empty;     
         public Gender? Gender { get; set; }
     }

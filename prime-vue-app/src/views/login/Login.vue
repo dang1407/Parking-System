@@ -93,7 +93,7 @@
                 }}</label>
               </div>
               <div class="text-primary-500">
-                <router-link to="">
+                <router-link to="/register">
                   {{ loginConstantsLanguage.donnotHaveAccount }}
                 </router-link>
               </div>
@@ -102,14 +102,14 @@
             <div class="mt-8 mb-4">
               <Button
                 v-if="!isPending"
-                class="w-[100%] rounded-[40px]"
+                class="w-[100%] h-12 rounded-[40px]"
                 @click="loginAsync"
                 >{{ loginConstantsLanguage.login }}</Button
               >
               <Button
                 v-else
                 severity="secondary"
-                class="w-[100%] rounded-[40px]"
+                class="w-[100%] h-12 rounded-[40px]"
                 disabled
                 @click="loginAsync"
                 >{{
@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Password from "primevue/password";
@@ -133,6 +133,7 @@ import { useToast } from "primevue/usetoast";
 import { languageDictionary } from "@/constants/languages";
 import { useLogin } from "./useLogin";
 import { useHelperStore } from "@/stores/HelperStore";
+import { useUserStore } from "@/stores/UserStore";
 import { useRouter } from "vue-router";
 const helperStore = useHelperStore();
 const toast = useToast();
@@ -156,6 +157,10 @@ async function loginAsync() {
     console.log(error);
   }
 }
+onMounted(async () => {
+  const UserStore = useUserStore();
+  await UserStore.reloginAsync();
+});
 </script>
 
 <style lang="scss" scoped></style>
