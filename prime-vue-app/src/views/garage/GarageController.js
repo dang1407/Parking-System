@@ -56,8 +56,6 @@ export function GarageController() {
     parkingVehicleData,
     parkingLotData,
     GarageConstancesLanguage,
-    ref,
-    computed,
     getParkingVehicleDataAsync,
     getParkingLotDataAsync,
     getVehicleSlotState,

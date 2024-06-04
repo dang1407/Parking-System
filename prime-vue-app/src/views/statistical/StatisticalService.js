@@ -74,7 +74,7 @@ const vehicleOptions = computed(() => {
 async function getParkingHistoryDataAsync() {
   try {
     const response = await request({
-      url: `ParkingHistory?page=${parkingHistoryPaging.value.page}&pageSize=${parkingHistoryPaging.value.pageSize}&searchProperty=${parkingHistoryPaging.value.pageSize}&searchProperty=${parkingHistoryPaging.value.searchProperty.value}`,
+      url: `ParkingHistory?page=1&pageSize=1000000000&searchProperty=${parkingHistoryPaging.value.pageSize}&searchProperty=${parkingHistoryPaging.value.searchProperty.value}`,
       method: "GET",
     });
     parkingHistoryData.value = response?.ModelData;

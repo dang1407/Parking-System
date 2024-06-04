@@ -1,15 +1,8 @@
-<template>
+<!-- <template>
   <div class="h-[100%] overflow-y-scroll flex flex-col bg-white rounded-xl">
-    <div>
-      <Dropdown
-        :options="vehicleOptions"
-        option-label="label"
-        v-model="parkingHistoryPaging.searchProperty"
-      ></Dropdown>
-    </div>
+    <div></div>
     <div class="w-[50%] p-8">
       <h1></h1>
-      <Chart type="bar" :data="chartData" :options="chartOptions"></Chart>
     </div>
   </div>
 </template>
@@ -18,6 +11,7 @@
 import { ref, onMounted } from "vue";
 import Chart from "primevue/chart";
 import Dropdown from "primevue/dropdown";
+import { useAxios } from "@/hooks/useAxios";
 import { StatisticalService } from "./StatisticalService.js";
 const {
   parkingHistoryData,
@@ -91,6 +85,16 @@ const setChartOptions = () => {
     },
   };
 };
+
+onMounted(async () => {});
 </script>
+
+<style lang="scss" scoped></style> -->
+
+<template>
+  <div></div>
+</template>
+
+<script setup></script>
 
 <style lang="scss" scoped></style>
