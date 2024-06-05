@@ -24,7 +24,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         [Route("")]
         [Authorize]
-        public async Task<IActionResult> GetFilterAsync(int page, int pageSize, string? searchProperty)
+        public virtual async Task<IActionResult> GetFilterAsync(int page, int pageSize, string? searchProperty)
         {
             Guid companyId = Guid.Parse(HttpContext.User.FindFirstValue("CompanyId"));
             if (companyId == Guid.Empty)

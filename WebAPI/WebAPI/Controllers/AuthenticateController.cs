@@ -65,7 +65,7 @@ namespace WebAPI.Controllers
                         new Claim(ClaimTypes.Role, user.Role),
                     }),
                     
-                    Expires = DateTime.UtcNow.AddMinutes (60),
+                    Expires = DateTime.UtcNow.AddDays(1),
                     Issuer = issuer,
                     Audience = audience,
                     SigningCredentials = new SigningCredentials

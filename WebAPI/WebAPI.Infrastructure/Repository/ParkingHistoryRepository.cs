@@ -101,5 +101,7 @@ namespace WebAPI.Infrastructure
             var result = await Uow.Connection.QueryAsync<ParkingHistory>(sql, param, commandType: System.Data.CommandType.StoredProcedure, transaction: Uow.Transaction);
             return result.ToList();
         }
+
+        
     }
 }

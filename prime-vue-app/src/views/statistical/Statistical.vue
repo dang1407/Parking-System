@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
   <div class="h-[100%] overflow-y-scroll flex flex-col bg-white rounded-xl">
     <div></div>
     <div class="w-[50%] p-8">
@@ -86,15 +86,10 @@ const setChartOptions = () => {
   };
 };
 
-onMounted(async () => {});
+onMounted(async () => {
+  await getParkingHistoryDataAsync();
+  console.log(parkingHistoryData.value);
+});
 </script>
-
-<style lang="scss" scoped></style> -->
-
-<template>
-  <div></div>
-</template>
-
-<script setup></script>
 
 <style lang="scss" scoped></style>

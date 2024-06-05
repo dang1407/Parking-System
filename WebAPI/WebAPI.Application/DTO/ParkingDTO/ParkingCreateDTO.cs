@@ -13,5 +13,7 @@ namespace WebAPI.Application
         public Guid CompanyId { get; set; }
         public int MotorSlot { get; set; }
         public int CarSlot { get; set; }
+        
+        public int BikecycleSlot { get; set; }  
     }
 }
