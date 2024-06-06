@@ -1,8 +1,3 @@
-<template>
-  <p>State: {{ connected }}</p>
-</template>
-
-<script>
 window.addEventListener("DOMContentLoaded", () => {
   const messages = document.createElement("ul");
   document.body.appendChild(messages);
@@ -15,4 +10,3 @@ window.addEventListener("DOMContentLoaded", () => {
     messages.appendChild(message);
   };
 });
-</script>

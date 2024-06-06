@@ -1,70 +1,108 @@
+# #!/usr/bin/env python
+
 # import asyncio
+# import datetime
+# import random
 # import websockets
-# import RPi.GPIO as GPIO
+# import os
+# # ... rest of your server code
 
-# # Thiết lập GPIO
-# GPIO.setmode(GPIO.BCM)
-# BUTTON_PIN = 23  # Số chân GPIO cho nút bấm
-# GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-# # Khởi tạo WebSocket server
-# async def server(websocket, path):
-#     async for message in websocket:
-#         # Xử lý tin nhắn từ client (nếu cần)
-#         pass
-
-#     # Gửi ảnh và trạng thái nút bấm qua WebSocket
-#     # cap = cv2.VideoCapture(0)  # Mở camera
-#     while True:
-#         ret, frame = cap.read()
-#         if ret:
-#             # Đường dẫn tới tệp ảnh cần gửi
-#             image_path = "./3.jpg"
-
+# async def show_time(websocket, path):
+#     try:
+#         while True: 
+#             image_path = "./1045-2.jpg"
 #             # Đọc nội dung tệp ảnh thành bytes
-#             with open(image_path, "rb") as image_file:
-#                 image_data = image_file.read()
-#             button_state = GPIO.input(BUTTON_PIN)
-#             await websocket.send((image_data.tobytes(), button_state))
-#         await asyncio.sleep(0.033)  # Giới hạn tốc độ khung hình (30fps)
+#             if(os.path.exists(image_path)):
+#                 with open(image_path, "rb") as image_file:
+#                     image_data = image_file.read()
+#                 await websocket.send(image_data)
+#             else:
+#                 await websocket.send("Không có ảnh")
+#             async for message in websocket:
+                
+#                 # Xử lý dữ liệu nhận được từ client
+#                 if message == 'deleteimage':
+#                     print(f"Nhận được từ client: {message}")
+#                     # os.remove("C:\\DATN\\Parking-System\\raspberrypi\\1045.jpg")
+#                     # Thực hiện xử lý dữ liệu tại đây
 
-# start_server = websockets.serve(server, "0.0.0.0", 8765)
+            
+#             await asyncio.sleep(random.random() * 2 + 1)
+#     except websockets.exceptions.ConnectionClosed:
+#         print("WebSocket connection closed")
 
-# asyncio.get_event_loop().run_until_complete(start_server)
-# asyncio.get_event_loop().run_forever()
+# async def handle_websocket(websocket):
+#     try:
+#         while True:
+#             image_path = "./1045-2.jpg"
 
+#             if os.path.exists(image_path):
+#                 with open(image_path, "rb") as image_file:
+#                     image_data = image_file.read()
+#                 await websocket.send(image_data)
+#             else:
+#                 await websocket.send("Không có ảnh")
 
+#             message = await websocket.recv()
+
+#             if message == 'deleteimage':
+#                 print(f"Nhận được từ client: {message}")
+#                 if os.path.exists(image_path):
+#                     os.remove(image_path)
+#                     print("Đã xóa tệp tin ảnh thành công.")
+#                 else:
+#                     print("Tệp tin ảnh không tồn tại.")
+
+#             await asyncio.sleep(random.random() * 2 + 1)
+#     except websockets.exceptions.ConnectionClosed:
+#         print("WebSocket connection closed")
+
+# async def main():
+#     async with websockets.serve(handle_websocket, "localhost", 5678):
+#         await asyncio.Future()  # run forever
+
+# if __name__ == "__main__":
+#     asyncio.run(main())
+
+import os
 import asyncio
-import socketio
-import RPi.GPIO as GPIO
-# import cv2
+import websockets
+import random
 
-sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
-app = socketio.ASGIApp(sio)
-
-GPIO.setmode(GPIO.BCM)
-BUTTON_PIN = 23
-GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-# cap = cv2.VideoCapture(0)
-
-@sio.event
-async def connect(sid, environ):
-    print('Client connected:', sid)
-
-@sio.on('disconnect')
-def disconnect(sid):
-    print('Client disconnected:', sid)
-
-async def send_image_and_button_state():
+async def send_image(websocket, image_path):
     while True:
-        ret, frame = cap.read()
-        if ret:
-            # image_data = cv2.imencode('.jpg', frame)[1].tobytes()
-            button_state = GPIO.input(BUTTON_PIN)
-            await sio.emit('image_and_button', (image_data, button_state))
-        await asyncio.sleep(0.033)
+        if os.path.exists(image_path):
+            with open(image_path, "rb") as image_file:
+                image_data = image_file.read()
+            await websocket.send(image_data)
+        else:
+            await websocket.send("Không có ảnh")
+        await asyncio.sleep(random.random() * 2 + 1)
 
-if __name__ == '__main__':
-    asyncio.create_task(send_image_and_button_state())
-    socketio.run(app, host='0.0.0.0', port=8765)
+async def handle_message(websocket, image_path):
+    while True:
+        message = await websocket.recv()
+        if message == 'deleteimage':
+            print(f"Nhận được từ client: {message}")
+            if os.path.exists(image_path):
+                os.remove(image_path)
+                print("Đã xóa tệp tin ảnh thành công.")
+            else:
+                print("Tệp tin ảnh không tồn tại.")
+
+async def handle_websocket(websocket):
+    try:
+        image_path = "./1045-2.jpg"
+        await asyncio.gather(
+            send_image(websocket, image_path),
+            handle_message(websocket, image_path)
+        )
+    except websockets.exceptions.ConnectionClosed:
+        print("WebSocket connection closed")
+
+async def main():
+    async with websockets.serve(handle_websocket, "localhost", 8765):
+        await asyncio.Future()  # run forever
+
+if __name__ == "__main__":
+    asyncio.run(main())
