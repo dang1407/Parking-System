@@ -13,6 +13,6 @@ namespace WebAPI.Application
 
         Task<ParkingHistoryDTO> EnterVehicleToGarageAsync(ParkingHistoryCreateDTO parkingHistoryCreateDTO, Guid companyId); 
         Task<ParkingHistoryDTO> EnterVehicleOutGarageAsync( ParkingHistoryCreateDTO parkingHistoryCreateDTO, Guid companyId);
-        Task<List<ParkingHistoryDTO>> GetParkingHistoryStatistical(ParkingHistoryDTO parkingHistoryQuery, Guid companyId);  
+        Task<List<ParkingHistoryDTO>> GetParkingHistoryStatistical(string year, int? vehicle);  
     }
 }

@@ -71,7 +71,7 @@ namespace WebAPI.Application
             return result;
         }
 
-        public Task<List<ParkingHistoryDTO>> GetParkingHistoryStatistical(ParkingHistoryDTO parkingHistoryQuery, Guid companyId)
+        public Task<List<ParkingHistoryDTO>> GetParkingHistoryStatistical(string year, int? vehicle)
         {
             throw new NotImplementedException();
         }

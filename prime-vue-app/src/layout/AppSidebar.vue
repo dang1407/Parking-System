@@ -97,6 +97,7 @@ onMounted(async () => {
     sidebar_label.value = SIDEBAR_LABEL_PARKMEMBER;
     console.log(SIDEBAR_LABEL_PARKMEMBER);
   } else if (userStore.role == "admin") {
+    SIDEBAR_ROUTE_ADMIN[1].items[1].hasSubMenu = true;
     sidebar_route.value = SIDEBAR_ROUTE_ADMIN;
     sidebar_label.value = SIDEBAR_LABEL_ADMIN;
     console.log(SIDEBAR_LABEL_ADMIN);

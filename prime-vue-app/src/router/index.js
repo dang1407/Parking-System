@@ -84,6 +84,22 @@ const routes = [
           }
         },
       },
+      {
+        name: "Vehicle",
+        path: "/vehicle",
+        component: () =>
+          import(
+            /* webPackChunkName: "statistical" */ "@/views/vehicleinout/Vehicle.vue"
+          ),
+        beforeEnter: (to, from, next) => {
+          const userStore = useUserStore();
+          if (userStore.role != Role.Admin) {
+            next({ name: "Error", params: {} });
+          } else {
+            next();
+          }
+        },
+      },
     ],
     beforeEnter: (to, from, next) => {
       requireAuth(to, from, next);

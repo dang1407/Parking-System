@@ -62,7 +62,7 @@ const vehicleOptionEnums = [
 ];
 
 const StatisticalConstancesLanguage = computed(() => {
-  return StatisticalConstances[helperStore.language.code];
+  return StatisticalConstances[helperStore.languageCode];
 });
 
 const vehicleOptions = computed(() => {
@@ -71,14 +71,17 @@ const vehicleOptions = computed(() => {
     StatisticalConstancesLanguage.value.vehicleOptions
   );
 });
-async function getParkingHistoryDataAsync() {
+async function getParkingHistoryStatisticalAsync(year, vehicle) {
   try {
+    let requestUrl = `ParkingHistory/statistical?year=${year}`;
+    if (vehicle) {
+      requestUrl += `&vehicle=${vehicle}`;
+    }
     const response = await request({
-      url: `ParkingHistory?page=1&pageSize=1000000000&searchProperty=${parkingHistoryPaging.value.pageSize}&searchProperty=${parkingHistoryPaging.value.searchProperty.value}`,
+      url: requestUrl,
       method: "GET",
     });
-    parkingHistoryData.value = response?.ModelData;
-    console.log(response);
+    return response;
   } catch (error) {
     console.log(error);
   }
@@ -91,6 +94,6 @@ export function StatisticalService() {
     StatisticalConstances,
     parkingHistoryPaging,
     StatisticalConstancesLanguage,
-    getParkingHistoryDataAsync,
+    getParkingHistoryStatisticalAsync,
   };
 }

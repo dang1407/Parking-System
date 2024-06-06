@@ -17,7 +17,7 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         [Route("statistical")]
-        public async Task<IActionResult> GetParkingHistoryStatisticalAsync([FromQuery] ParkingHistoryDTO parkingHistoryQuery)
+        public async Task<IActionResult> GetParkingHistoryStatisticalAsync(string year, int? vehicle)
         {
             Guid companyId = Guid.Parse(HttpContext.User.FindFirstValue("CompanyId"));
             return Ok();
