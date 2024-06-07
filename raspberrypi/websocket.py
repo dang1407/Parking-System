@@ -68,18 +68,27 @@ import os
 import asyncio
 import websockets
 import random
+import json
+import base64
 
-async def send_image(websocket, image_path):
+async def send_image(websocket, image_path, license_plate_path):
     while True:
         if os.path.exists(image_path):
             with open(image_path, "rb") as image_file:
-                image_data = image_file.read()
-            await websocket.send(image_data)
-        else:
-            await websocket.send("Không có ảnh")
+                image_data = base64.b64encode(image_file.read()).decode('utf-8')
+            with open(license_plate_path, "rb") as license_plate_file:
+                license_plate = license_plate_file.readline().decode('utf-8').strip()
+            # await websocket.send(image_data)
+            data = {
+                'image_data' : image_data,
+                'license_plate': license_plate
+            }
+            await websocket.send(json.dumps(data))
+        # else:
+        #     await websocket.send("Không có ảnh")
         await asyncio.sleep(random.random() * 2 + 1)
 
-async def handle_message(websocket, image_path):
+async def handle_message(websocket, image_path, license_plate_path):
     while True:
         message = await websocket.recv()
         if message == 'deleteimage':
@@ -93,9 +102,10 @@ async def handle_message(websocket, image_path):
 async def handle_websocket(websocket):
     try:
         image_path = "./1045-2.jpg"
+        license_plate_path = "./licenseplate.txt"
         await asyncio.gather(
-            send_image(websocket, image_path),
-            handle_message(websocket, image_path)
+            send_image(websocket, image_path, license_plate_path),
+            handle_message(websocket, image_path, license_plate_path)
         )
     except websockets.exceptions.ConnectionClosed:
         print("WebSocket connection closed")
