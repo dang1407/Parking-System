@@ -87,18 +87,40 @@ namespace WebAPI.Infrastructure
             }
         }
 
-        public async Task<List<ParkingHistory>> GetStatisticalParkingHistoryAsync(ParkingHistory parkingHistoryQuery,Guid companyId)
+        public async Task<List<ParkingHistory>> GetStatisticalParkingHistoryAsync(string year, int vehicle, Guid companyId)
         {
-            string sql = "Proc_Read_ParkingHistoryStatistical";
-            
+            string sql = "";
+            var yearSplit = year.Split(",");
             var param = new DynamicParameters();
-            Type type = parkingHistoryQuery.GetType();
-            PropertyInfo[] properties = type.GetProperties();       
-            foreach(var property in properties)
+            param.Add("CompanyId", companyId.ToString());
+            param.Add("year", yearSplit);
+            param.Add("Vehicle", vehicle);
+            if (yearSplit.Length > 1 )
             {
-                param.Add("p_" + property.Name, property.GetValue(parkingHistoryQuery));
+                if(vehicle != -1)
+                {
+                    sql = "Select p.* from ParkingHistory p, Parking p1 where p.ParkingId = p1.ParkingId and p1.CompanyId = @CompanyId and YEAR(p.VehicleInDate) in @year and Vehicle = @Vehicle;";
+                    
+                }
+                else
+                {
+                    sql = "Select p.* from ParkingHistory p, Parking p1 where p.ParkingId = p1.ParkingId and p1.CompanyId = @CompanyId and YEAR(p.VehicleInDate) in @year;";
+                }
+            }  
+            else
+            {
+                if (vehicle != -1)
+                {
+                    sql = "Select p.* from ParkingHistory p, Parking p1 where p.ParkingId = p1.ParkingId and p1.CompanyId = @CompanyId and YEAR(p.VehicleInDate) = @year and Vehicle = @Vehicle;";
+
+                }
+                else
+                {
+                    sql = "Select p.* from ParkingHistory p, Parking p1 where p.ParkingId = p1.ParkingId and p1.CompanyId = @CompanyId and YEAR(p.VehicleInDate) = @year;";
+                    //sql = "Select p.* from ParkingHistory p, Parking p1 where p.ParkingId = p1.ParkingId and p1.CompanyId = @CompanyId";
+                }
             }
-            var result = await Uow.Connection.QueryAsync<ParkingHistory>(sql, param, commandType: System.Data.CommandType.StoredProcedure, transaction: Uow.Transaction);
+            var result = await Uow.Connection.QueryAsync<ParkingHistory>(sql, param, transaction: Uow.Transaction); 
             return result.ToList();
         }
 

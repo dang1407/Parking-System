@@ -1,6 +1,7 @@
 export const GarageConstances = {
   vi: {
     infor: "Thông tin xe có trong bãi đỗ xe",
+    column: "Cột",
     mapTitle: "Bản đồ bãi đỗ xe",
     intervalCallTitle: (time) =>
       `Thông tin bãi đỗ xe được cập nhật ${time} giây một lần`,
@@ -12,6 +13,8 @@ export const GarageConstances = {
       MissingLicensePlate: "Bạn chưa điền thông tin biển số xe",
     },
     formLabel: {
+      LicensePlatePredictLabel: "Biển số xe đọc được",
+      LicensePlateImageTakedLabel: "Hình ảnh xe đã chụp",
       LicensePlate: "Biển số xe",
       ParkSlotCode: "Mã vị trí gửi xe",
       VehicleLabel: "Loại xe",
@@ -32,6 +35,7 @@ export const GarageConstances = {
   },
   en: {
     infor: "Vehicle information available in the parking lot",
+    column: "Column",
     mapTitle: "Parking lot map",
     intervalCallTitle: (time) =>
       `Parking information is updated every ${time} seconds`,
@@ -44,6 +48,8 @@ export const GarageConstances = {
         "You have not filled in the license plate information",
     },
     formLabel: {
+      LicensePlatePredictLabel: "License plate readable",
+      LicensePlateImageTakedLabel: "Vehicle image taken",
       LicensePlate: "License plate",
       ParkSlotCode: "Parking location code",
       VehicleLabel: "Vehicle type",

@@ -23,6 +23,11 @@
                   src="../../assets/imgs/top_view_car_icon.png"
                   alt="Ảnh minh họa xe"
                 />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
+                />
               </div>
             </div>
 
@@ -43,6 +48,11 @@
                   src="../../assets/imgs/top_view_car_icon.png"
                   alt="Ảnh minh họa xe"
                 />
+                <img
+                  class="-rotate-90 w-[50%]"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  src="../../assets/imgs/top_view_car_icon.png"
+                />
               </div>
             </div>
           </div>
@@ -58,6 +68,11 @@
                   class="-rotate-90 w-[50%]"
                   src="../../assets/imgs/top_view_car_icon.png"
                   alt="Ảnh minh họa xe"
+                />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
                 />
               </div>
             </div>
@@ -79,6 +94,11 @@
                   src="../../assets/imgs/top_view_car_icon.png"
                   alt="Ảnh minh họa xe"
                 />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
+                />
               </div>
             </div>
           </div>
@@ -96,6 +116,11 @@
                   class="-rotate-90 w-[50%]"
                   src="../../assets/imgs/top_view_motorbike_icon.png"
                   alt="Ảnh minh họa xe"
+                />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
                 />
               </div>
             </div>
@@ -117,6 +142,11 @@
                   src="../../assets/imgs/top_view_motorbike_icon.png"
                   alt="Ảnh minh họa xe"
                 />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
+                />
               </div>
             </div>
           </div>
@@ -132,6 +162,11 @@
                   class="-rotate-90 w-[50%]"
                   src="../../assets/imgs/top_view_motorbike_icon.png"
                   alt="Ảnh minh họa xe"
+                />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
                 />
               </div>
             </div>
@@ -152,6 +187,11 @@
                   src="../../assets/imgs/top_view_motorbike_icon.png"
                   alt="Ảnh minh họa xe"
                 />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
+                />
               </div>
             </div>
           </div>
@@ -169,6 +209,11 @@
                   class="-rotate-90 w-[50%]"
                   src="../../assets/imgs/top_view_bikecycle_icon.png"
                   alt="Ảnh minh họa xe"
+                />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
                 />
               </div>
             </div>
@@ -189,6 +234,11 @@
                   src="../../assets/imgs/top_view_bikecycle_icon.png"
                   alt="Ảnh minh họa xe"
                 />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
+                />
               </div>
             </div>
           </div>
@@ -204,6 +254,11 @@
                   class="-rotate-90 w-[50%]"
                   src="../../assets/imgs/top_view_bikecycle_icon.png"
                   alt="Ảnh minh họa xe"
+                />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
                 />
               </div>
             </div>
@@ -223,6 +278,11 @@
                   class="-rotate-90 w-[50%]"
                   src="../../assets/imgs/top_view_bikecycle_icon.png"
                   alt="Ảnh minh họa xe"
+                />
+                <img
+                  src="../../assets/imgs/preorder.png"
+                  v-if="item.ParkSlotState == carStateEnum.Reserved"
+                  class="-rotate-90 w-[50%]"
                 />
               </div>
             </div>
@@ -244,8 +304,10 @@
         <div class="min-w-52">
           <ParkSlotForm
             :parkSlotFormData="parkingSlotFormData"
+            :licensePlate="licensePlate"
+            :licensePlateImageUrl="imageURL"
             @closeForm="toggleParkSlotForm"
-            @updateParkSlotSuccess="getParkSlotData"
+            @updateParkSlotSuccess="getParkSlotData(route.params.parkingId)"
           ></ParkSlotForm>
         </div>
       </div>
@@ -254,21 +316,28 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, ref, computed } from "vue";
 
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/UserStore.js";
-import { ref, computed } from "vue";
 import { useAxios } from "@/hooks/useAxios";
 import ParkSlotForm from "./ParkSlotForm.vue";
 import { GarageConstances } from "./GarageConstances.js";
 import { useHelperStore } from "@/stores/HelperStore";
+import axios from "axios";
+import { useToast } from "primevue/usetoast";
+const toast = useToast();
+const { request } = useAxios();
 const HelperStore = useHelperStore();
+
+const currentTime = ref("");
+const imageURL = ref("");
+const licensePlate = ref("");
+let socket = null;
+
 const GarageConstancesLanguage = computed(() => {
   return GarageConstances[HelperStore.languageCode];
 });
-import axios from "axios";
-const { request } = useAxios();
 const VehicleEnum = {
   Bikecycle: 0,
   Motorbike: 1,
@@ -294,6 +363,7 @@ const parkingVehicleData = ref({});
 const parkingSlotDatas = ref({});
 const parkingSlotFormData = ref({});
 const isShowParkSlotForm = ref(false);
+const isShowParkSlotFormErrorToast = ref(false);
 async function getParkingVehicleDataAsync(parkingId) {
   try {
     const response = await request({
@@ -347,10 +417,73 @@ function toggleParkSlotForm(item) {
 
 const userStore = useUserStore();
 const route = useRoute();
+
+// Sự kiện gửi dữ liệu đến server
+function sendDataToServer(data) {
+  // Kiểm tra kết nối WebSocket
+  if (socket.readyState === WebSocket.OPEN) {
+    // Gửi dữ liệu đến server
+    socket.send(data);
+  } else {
+    console.error("WebSocket không được kết nối!");
+  }
+}
+
 onMounted(async () => {
   if (route.params.parkingId) {
     await getParkSlotData(route.params.parkingId);
   }
+  // Kết nối với WebSocket server
+  socket = new WebSocket("ws://localhost:8765");
+
+  // Xử lý sự kiện khi nhận dữ liệu từ server
+  socket.addEventListener("message", (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      const { image_data, license_plate } = data;
+      // if (license_plate) {
+      //   isShowParkSlotFormErrorToast.value = false;
+      // }
+      if (
+        isShowParkSlotForm.value &&
+        !license_plate &&
+        !isShowParkSlotFormErrorToast.value
+      ) {
+        toast.add({
+          severity: "info",
+          summary: "Info",
+          detail: "Message Content",
+          life: 3000,
+        });
+        isShowParkSlotFormErrorToast.value = true;
+      }
+      const binaryData = atob(image_data); // Giải mã chuỗi base64 thành dữ liệu nhị phân
+      const bytes = new Uint8Array(binaryData.length);
+      for (let i = 0; i < binaryData.length; i++) {
+        bytes[i] = binaryData.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: "image/jpeg" }); // Tạo một đối tượng Blob từ dữ liệu nhị phân
+      const imageUrlBlob = URL.createObjectURL(blob);
+      imageURL.value = imageUrlBlob;
+      licensePlate.value = license_plate;
+      // // Check if it's the image data
+      // if (event.data instanceof Blob) {
+      //   const licensePlateURL = window.URL.createObjectURL(event.data);
+      //   imageURL.value = licensePlateURL;
+      //   return; // Exit after handling image data
+      // } else {
+      //   // Otherwise, it's the license plate
+      //   const licensePlateText = JSON.parse(event.data); // Parse license plate as JSON
+      //   licensePlate.value = licensePlateText;
+      // }
+    } catch (error) {
+      console.error("Error parsing server message:", error);
+    }
+  });
+  socket.addEventListener("takephoto", (data) => {
+    var imageUri = URL.createObjectURL(data.image);
+    imageURL.value = imageUri;
+  });
 });
 </script>
 

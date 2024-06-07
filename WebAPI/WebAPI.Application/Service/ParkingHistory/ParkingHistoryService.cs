@@ -71,9 +71,10 @@ namespace WebAPI.Application
             return result;
         }
 
-        public Task<List<ParkingHistoryDTO>> GetParkingHistoryStatistical(string year, int? vehicle)
+        public async Task<List<ParkingHistoryDTO>> GetParkingHistoryStatistical(string year, int vehicle, Guid companyId)
         {
-            throw new NotImplementedException();
+            var parkingHistory = await _parkingHistoryRepository.GetStatisticalParkingHistoryAsync(year, vehicle, companyId);   
+            return parkingHistory.Select(x => MapEntityToDTO(x)).ToList();   
         }
     }
 }

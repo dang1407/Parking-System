@@ -161,6 +161,7 @@ namespace WebAPI.Infrastructure
             PropertyInfo[] properties = type.GetProperties();
             foreach (var property in properties)
             {
+                Console.Write(property.ToString());
                 param.Add("p_" + property.Name, property.GetValue(entity));
             }
             param.Add("p_CompanyId", companyId);
