@@ -15,6 +15,16 @@ namespace WebAPI.Infrastructure
         {
         }
 
+        public async Task<ParkSlot> GetParkSlotById(Guid parkSlotId, Guid companyId)
+        {
+            string sql = "Select p.* from parkslot p, parking p1 where ParkSlotId = @ParkSlotId and p.ParkingId = p1.ParkingId and p1.CompanyId = @CompanyId;";
+            var param = new DynamicParameters();
+            param.Add("ParkSlotId", parkSlotId);
+            param.Add("CompanyId", companyId);
+            var result = await Uow.Connection.QueryAsync<ParkSlot>(sql, param);
+            return (ParkSlot)result.ToList()[0];
+        }
+
         public async Task<List<ParkSlot>> GetParkSlotByParkingIdAsync(Guid parkingId)
         {
             string sql = "Select * from ParkSlot where ParkingId = @ParkingId;";

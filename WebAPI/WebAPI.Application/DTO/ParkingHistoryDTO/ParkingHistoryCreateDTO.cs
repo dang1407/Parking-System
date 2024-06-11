@@ -18,8 +18,6 @@ namespace WebAPI.Application
         public DateTimeOffset? VehicleOutDate { get; set; }
         public DateTimeOffset VehicleInDate { get; set; }   
         public int Vehicle { get; set; }
-        public string? VehicleInImageLink { get; set; }
-
-        public IFormFile? VehicleInImage { get; set; }   
+   
     }
 }

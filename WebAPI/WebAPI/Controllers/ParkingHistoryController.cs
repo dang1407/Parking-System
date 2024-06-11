@@ -29,10 +29,10 @@ namespace WebAPI.Controllers
             var yearSplit = year.Split(",");
             if (year.Split(",").Length < 2)
             {
-                int[] prices = new int[13] {0, 0, 0, 0, 0, 0, 0 , 0, 0, 0, 0, 0, 0};
+                int[] prices = new int[12] {0, 0, 0, 0, 0, 0, 0 , 0, 0, 0, 0, 0};
                 foreach(var p in result)
                 {
-                    prices[((DateTimeOffset)p.VehicleInDate).Month] += p.Price;    
+                    prices[((DateTimeOffset)p.VehicleInDate).Month - 1] += p.Price;    
                 }
                 return Ok(new
                 {
@@ -44,12 +44,13 @@ namespace WebAPI.Controllers
                 var finalResult = new List<object>();
                 for(int i = 0; i < yearSplit.Length; i++)
                 {
-                    int[] prices = new int[13] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    int[] prices = new int[12] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                     foreach (var p in result)
                     {
                         if(((DateTimeOffset)p.VehicleInDate).Year == Int32.Parse(yearSplit[i]))
                         {
-                            prices[((DateTimeOffset)p.VehicleInDate).Month] += p.Price;
+
+                            prices[((DateTimeOffset)p.VehicleInDate).Month - 1] += p.Price;
                         }
                     }
                     finalResult.Add(new 

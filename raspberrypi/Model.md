@@ -81,3 +81,10 @@ Batch size ảnh hưởng đến hiệu suất và độ ổn định của quá
 Epoch là số lần lặp lại toàn bộ tập dữ liệu huấn luyện.
 
 Trọng số là các tham số trong mô hình học máy, được cập nhật trong quá trình huấn luyện để mô hình có thể học và dự đoán.
+
+
+p.Vehicle = '0abe3707-c300-4745-a006-d5fe897ebc35'
+      OR p.LicensePlate = '0abe3707-c300-4745-a006-d5fe897ebc35'
+      OR p.VehicleInDate LIKE searchString
+      OR p.ParkingId = '0abe3707-c300-4745-a006-d5fe897ebc35'
+      OR p.ParkSlotId = '0abe3707-c300-4745-a006-d5fe897ebc35'

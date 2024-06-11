@@ -1,4 +1,4 @@
-export const statisticalConstants = {
+export const StatisticalConstances = {
   vi: {
     title: "Thống kê doanh thu",
     chartLabel: [
@@ -15,8 +15,23 @@ export const statisticalConstants = {
       "T11",
       "T12",
     ],
+    vehicleOptions: [
+      {
+        label: "Xe đạp",
+      },
+      {
+        label: "Xe máy",
+      },
+      {
+        label: "Ô tô",
+      },
+      {
+        label: "Tất cả",
+      },
+    ],
   },
   en: {
+    title: "Thống kê doanh thu",
     chartLabel: [
       "Jan",
       "Feb",
@@ -30,6 +45,20 @@ export const statisticalConstants = {
       "Oct",
       "Nov",
       "Dec",
+    ],
+    vehicleOptions: [
+      {
+        label: "Bikecycle",
+      },
+      {
+        label: "Motorbike",
+      },
+      {
+        label: "Car",
+      },
+      {
+        label: "All",
+      },
     ],
   },
 };

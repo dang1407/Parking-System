@@ -25,6 +25,11 @@ const routes = [
         component: () => import("@/views/dashboard/DashBoard.vue"),
       },
       {
+        name: "User Infor",
+        path: "/infor",
+        component: () => import("@/views/userinfo/UserInfor.vue"),
+      },
+      {
         name: "Employee Page",
         path: "/employee",
         component: () =>
@@ -75,14 +80,14 @@ const routes = [
           import(
             /* webPackChunkName: "statistical" */ "@/views/statistical/Statistical.vue"
           ),
-        beforeEnter: (to, from, next) => {
-          const userStore = useUserStore();
-          if (userStore.role != Role.Admin) {
-            next({ name: "Error", params: {} });
-          } else {
-            next();
-          }
-        },
+        // beforeEnter: (to, from, next) => {
+        //   const userStore = useUserStore();
+        //   if (userStore.role != Role.Admin) {
+        //     next({ name: "Error", params: {} });
+        //   } else {
+        //     next();
+        //   }
+        // },
       },
       {
         name: "Vehicle",

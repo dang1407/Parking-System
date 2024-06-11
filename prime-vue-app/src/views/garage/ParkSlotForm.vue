@@ -1,5 +1,5 @@
 <template>
-  <div class="lg:min-w-[800px] md:min-w-[400px] xs:w-[90%]">
+  <div class="lg:min-w-[800px] md:min-w-[600px] xs:w-[90%]">
     <h1 class="font-bold text-2xl">{{ GarageConstancesLanguage.formTitle }}</h1>
     <div class="flex">
       <div
@@ -61,6 +61,20 @@
             />
             <br />
           </div>
+          <div class="flex flex-col flex-1 gap-1">
+            <label class="font-bold">{{
+              GarageConstancesLanguage.formLabel.VehicleInDateLabel
+            }}</label>
+            <InputText
+              readonly
+              class="h-[36px]"
+              :value="
+                convertDateDBToDDMMYYYHHMM(parkSlotFormData.VehicleInDate)
+              "
+              aria-describedby="vehicle-help"
+            />
+            <br />
+          </div>
         </div>
         <div
           v-if="
@@ -96,13 +110,21 @@
             </Button>
             <Button
               v-if="parkSlotFormData.ParkSlotState == 1"
-              label="Đưa xe vào bãi"
+              :label="
+                !isUpdateCustomerLicensePlate
+                  ? GarageConstancesLanguage.formLabel.enterVehilceToGarage
+                  : GarageConstancesLanguage.update
+              "
               @click="enterVehicleToGarage(parkSlotFormData.ParkSlotId)"
             >
             </Button>
             <Button
               v-if="parkSlotFormData.ParkSlotState == 2"
-              label="Lấy xe ra khỏi bãi"
+              :label="
+                !isUpdateCustomerLicensePlate
+                  ? GarageConstancesLanguage.formLabel.caculateBill
+                  : GarageConstancesLanguage.update
+              "
               @click="enterVehicleOutGarage(parkSlotFormData.ParkSlotId)"
             >
             </Button>
@@ -110,7 +132,10 @@
         </div>
       </div>
       <div
-        v-if="userStore.role == 'admin' || userStore.role == 'employee'"
+        v-if="
+          (userStore.role == 'admin' || userStore.role == 'employee') &&
+          !isUpdateCustomerLicensePlate
+        "
         class="p-4"
       >
         <div class="flex flex-col flex-1 gap-1">
@@ -155,8 +180,13 @@ import { useHelperStore } from "@/stores/HelperStore";
 import { useUserStore } from "@/stores/UserStore.js";
 import { useAxios } from "@/hooks/useAxios.js";
 import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
+import { useConvert } from "@/hooks/useConvert.js";
+const confirm = useConfirm();
 const emits = defineEmits(["closeForm", "updateParkSlotSuccess"]);
 const toast = useToast();
+const { convertDateDBToDDMMYYYHHMM } = useConvert();
+console.log(convertDateDBToDDMMYYYHHMM("2024-06-06T23:28:22+07:00"));
 const { request } = useAxios();
 
 const userStore = useUserStore();
@@ -168,7 +198,7 @@ const parkSlotFormData = defineModel("parkSlotFormData");
 const formError = ref({});
 const licensePlate = defineModel("licensePlate");
 const licensePlateImageUrl = defineModel("licensePlateImageUrl");
-
+const isUpdateCustomerLicensePlate = ref(false);
 async function orderParkSlot(parkSlotId) {
   if (!parkSlotFormData.value.LicensePlate) {
     console.log(GarageConstancesLanguage.value);
@@ -194,28 +224,42 @@ async function orderParkSlot(parkSlotId) {
     emits("closeForm");
     emits("updateParkSlotSuccess");
     console.log(response, parkSlotFormData.value);
+    isUpdateCustomerLicensePlate.value = false;
   } catch (error) {
     console.log(error);
   }
 }
 
+function showDialogLicensePlateNotValid() {
+  confirm.require({
+    message: GarageConstancesLanguage.value.formError.LicensePlateNotMatch,
+    header: "Confirmation",
+    icon: "pi pi-exclamation-triangle text-[48px] mr-2",
+    rejectProps: {
+      label: GarageConstancesLanguage.value.takePhotoAgain,
+      severity: "danger",
+      outlined: true,
+    },
+    rejectLabel: GarageConstancesLanguage.value.takePhotoAgain,
+    acceptLabel: GarageConstancesLanguage.value.updateCustomerLicensePlate,
+    accept: () => {
+      isUpdateCustomerLicensePlate.value = true;
+    },
+    reject: () => {
+      isUpdateCustomerLicensePlate.value = false;
+    },
+  });
+}
+
 async function enterVehicleToGarage(parkSlotId) {
-  if (!parkSlotFormData.value.LicensePlate) {
-    console.log(GarageConstancesLanguage.value);
-    formError.value.LicensePlate =
-      GarageConstancesLanguage.value.formError.MissingLicensePlate;
-    toast.add({
-      severity: "info",
-      summary: GarageConstancesLanguage.value.missingFieldRequired,
-      detail: GarageConstancesLanguage.value.formError.MissingLicensePlate,
-      life: 3000,
-    });
-    return;
-  }
-  const formData = { ...parkSlotFormData.value };
-  formData.ParkSlotState = 2;
-  console.log(parkSlotFormData.value);
   try {
+    if (licensePlate.value != parkSlotFormData.value.LicensePlate) {
+      showDialogLicensePlateNotValid();
+      return;
+    }
+    const formData = { ...parkSlotFormData.value };
+    formData.ParkSlotState = 2;
+    console.log(parkSlotFormData.value);
     const response = await request({
       url: `ParkSlots/${parkSlotId}`,
       method: "PUT",
@@ -229,12 +273,22 @@ async function enterVehicleToGarage(parkSlotId) {
   }
 }
 
-async function enterVehicleOutGarage() {
+async function enterVehicleOutGarage(parkSlotId) {
+  if (licensePlate.value != parkSlotFormData.value.LicensePlate) {
+    showDialogLicensePlateNotValid();
+    return;
+  }
   const formData = { ...parkSlotFormData.value };
   formData.ParkSlotState = 0;
   formData.LicensePlate = "";
   console.log(parkSlotFormData.value);
   try {
+    const parkingHistory = await request({
+      url: "ParkingHistory",
+      method: "POST",
+      data: "",
+    });
+
     const response = await request({
       url: `ParkSlots/${parkSlotId}`,
       method: "PUT",

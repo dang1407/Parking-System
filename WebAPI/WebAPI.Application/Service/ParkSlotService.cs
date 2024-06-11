@@ -42,6 +42,21 @@ namespace WebAPI.Application
             return parkSlotDTOs;
         }
 
-        
+
+        public override async Task ValidateUpdateBusinessAsync(ParkSlot entity, Guid companyId)
+        {
+            var result = await _parkSlotRepository.GetParkSlotById(entity.ParkSlotId, companyId);
+            if(result == null)
+            {
+                throw new NotFoundException("Không tìm thấy ");
+            }
+            
+        }
+
+        public override async Task<ParkSlotDTO> GetByIdAsync(Guid id, Guid companyId)
+        {
+            var result = await _parkSlotRepository.GetParkSlotById(id, companyId);
+            return MapEntityToDTO(result);
+        }
     }
 }

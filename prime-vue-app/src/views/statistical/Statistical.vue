@@ -1,43 +1,85 @@
 <template>
-  <div
-    class="h-[100%] xs:overflow-y-scroll md:overflow-auto flex flex-col bg-white rounded-xl"
-  >
-    <div></div>
-    <div class="w-[50%] p-8">
-      <h1></h1>
-      <div>
-        <Chart :data="chartData"></Chart>
-      </div>
+  <div class="w-full h-full rounded-2xl bg-white p-4">
+    <h1 class="font-bold text-2xl">
+      {{ StatisticalConstancesLanguage.title }}
+    </h1>
+    <div>
+      <Chart
+        type="line"
+        :data="chartData"
+        :options="chartOptions"
+        class="h-30rem"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { locales } from "@/constants/locale";
 import Chart from "primevue/chart";
 import Dropdown from "primevue/dropdown";
-import { useAxios } from "@/hooks/useAxios";
+import { StatisticalService } from "./StatisticalService.js";
+const { StatisticalConstancesLanguage, getParkingHistoryStatisticalAsync } =
+  StatisticalService();
+const year = ref(new Date().getFullYear());
+onMounted(async () => {
+  chartOptions.value = setChartOptions();
+  const response = await getParkingHistoryStatisticalAsync(year.value);
+  const data = response.Price;
+  chartData.value.datasets[0].data = response.Price;
+  console.log(data);
+});
+
 const chartData = ref({
-  labels: ["January", "February", "March", "April", "May", "June", "July"],
+  labels: StatisticalConstancesLanguage.value.chartLabel,
   datasets: [
     {
       label: "First Dataset",
       data: [65, 59, 80, 81, 56, 55, 40],
       fill: false,
-      backgroundColor: documentStyle.getPropertyValue("--primary-500"),
-      borderColor: documentStyle.getPropertyValue("--primary-500"),
-      tension: 0.4,
-    },
-    {
-      label: "Second Dataset",
-      data: [28, 48, 40, 19, 86, 27, 90],
-      fill: false,
-      backgroundColor: documentStyle.getPropertyValue("--primary-200"),
-      borderColor: documentStyle.getPropertyValue("--primary-200"),
+      borderColor: "#10B981",
       tension: 0.4,
     },
   ],
 });
-</script>
+const chartOptions = ref();
+const setChartOptions = () => {
+  const documentStyle = getComputedStyle(document.documentElement);
+  const textColor = documentStyle.getPropertyValue("--text-color");
+  const textColorSecondary = documentStyle.getPropertyValue(
+    "--text-color-secondary"
+  );
+  const surfaceBorder = documentStyle.getPropertyValue("--surface-border");
 
-<style lang="scss" scoped></style>
+  return {
+    maintainAspectRatio: false,
+    aspectRatio: 0.6,
+    plugins: {
+      legend: {
+        labels: {
+          color: textColor,
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: textColorSecondary,
+        },
+        grid: {
+          color: surfaceBorder,
+        },
+      },
+      y: {
+        ticks: {
+          color: textColorSecondary,
+        },
+        grid: {
+          color: surfaceBorder,
+        },
+      },
+    },
+  };
+};
+</script>

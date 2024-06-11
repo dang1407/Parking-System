@@ -411,7 +411,7 @@ async function getParkSlotData(parkingId) {
 
 function toggleParkSlotForm(item) {
   parkingSlotFormData.value = item;
-  console.log(item);
+  // console.log(item);
   isShowParkSlotForm.value = !isShowParkSlotForm.value;
 }
 

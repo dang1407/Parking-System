@@ -49,7 +49,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         [Route("{id}")]
         [Authorize]
-        public async Task<IActionResult> GetByIdAsync(Guid id)
+        public virtual async Task<IActionResult> GetByIdAsync(Guid id)
         {
             Guid companyId = Guid.Parse(HttpContext.User.FindFirstValue("CompanyId"));
             if(companyId == Guid.Empty) 

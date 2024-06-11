@@ -134,5 +134,16 @@ namespace WebAPI.Controllers
                 C4 = C4,    
             });
         }
+
+        public override async Task<IActionResult> GetByIdAsync(Guid id)
+        {
+            Guid companyId = Guid.Parse(HttpContext.User.FindFirstValue("CompanyId"));
+            var result = await _parkSlotService.GetByIdAsync(id, companyId); 
+            return Ok(result);    
+        }
     }
+
+
+
+
 }

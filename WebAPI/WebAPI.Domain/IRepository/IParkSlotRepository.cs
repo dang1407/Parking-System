@@ -11,5 +11,6 @@ namespace WebAPI.Domain
         Task<List<ParkSlot>> GetParkSlotsByFloorAsync(string floor);
         Task<ParkSlot> GetParkSlotsByLicensePlateAsync(string licensePlate);
         Task<List<ParkSlot>> GetParkSlotByParkingIdAsync(Guid parkingId);
+        Task<ParkSlot> GetParkSlotById(Guid parkSlotId, Guid companyId);
     }
 }

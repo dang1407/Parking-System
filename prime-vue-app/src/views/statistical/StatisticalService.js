@@ -2,7 +2,11 @@ import { useAxios } from "@/hooks/useAxios";
 import { ref, computed } from "vue";
 import { useHelperStore } from "@/stores/HelperStore";
 import { mergeWith } from "lodash-es";
+import { StatisticalConstances } from "./StatisticalConstants";
 const helperStore = useHelperStore();
+const StatisticalConstancesLanguage = computed(() => {
+  return StatisticalConstances[helperStore.languageCode];
+});
 const { request } = useAxios();
 const parkingHistoryData = ref([]);
 const parkingHistoryPaging = ref({
@@ -12,40 +16,7 @@ const parkingHistoryPaging = ref({
     value: 3,
   },
 });
-const StatisticalConstances = {
-  vi: {
-    vehicleOptions: [
-      {
-        label: "Xe đạp",
-      },
-      {
-        label: "Xe máy",
-      },
-      {
-        label: "Ô tô",
-      },
-      {
-        label: "Tất cả",
-      },
-    ],
-  },
-  en: {
-    vehicleOptions: [
-      {
-        label: "Bikecycle",
-      },
-      {
-        label: "Motorbike",
-      },
-      {
-        label: "Car",
-      },
-      {
-        label: "All",
-      },
-    ],
-  },
-};
+
 const vehicleOptionEnums = [
   {
     value: 0,
@@ -60,10 +31,6 @@ const vehicleOptionEnums = [
     value: 3,
   },
 ];
-
-const StatisticalConstancesLanguage = computed(() => {
-  return StatisticalConstances[helperStore.languageCode];
-});
 
 const vehicleOptions = computed(() => {
   return mergeWith(
