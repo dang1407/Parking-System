@@ -3,8 +3,8 @@
     <h1>WebSocket Time</h1>
     <p>{{ currentTime }}</p>
     <img :src="imageURL" alt="" />
-    <button type="button" @click="sendDataToServer('deleteimage')">
-      Delete image
+    <button type="button" @click="sendDataToServer('update_parkslot')">
+      update_parkslot
     </button>
     <div>{{ licensePlate }}</div>
   </div>
@@ -25,17 +25,18 @@ onMounted(() => {
   // Xử lý sự kiện khi nhận dữ liệu từ server
   socket.addEventListener("message", (event) => {
     try {
-      const data = JSON.parse(event.data);
-      const { image_data, license_plate } = data;
-      const binaryData = atob(image_data); // Giải mã chuỗi base64 thành dữ liệu nhị phân
-      const bytes = new Uint8Array(binaryData.length);
-      for (let i = 0; i < binaryData.length; i++) {
-        bytes[i] = binaryData.charCodeAt(i);
-      }
-      const blob = new Blob([bytes], { type: "image/jpeg" }); // Tạo một đối tượng Blob từ dữ liệu nhị phân
-      const imageUrlBlob = URL.createObjectURL(blob);
-      imageURL.value = imageUrlBlob;
-      licensePlate.value = license_plate;
+      console.log(event.data);
+      // const data = JSON.parse(event.data);
+      // const { image_data, license_plate } = data;
+      // const binaryData = atob(image_data); // Giải mã chuỗi base64 thành dữ liệu nhị phân
+      // const bytes = new Uint8Array(binaryData.length);
+      // for (let i = 0; i < binaryData.length; i++) {
+      //   bytes[i] = binaryData.charCodeAt(i);
+      // }
+      // const blob = new Blob([bytes], { type: "image/jpeg" }); // Tạo một đối tượng Blob từ dữ liệu nhị phân
+      // const imageUrlBlob = URL.createObjectURL(blob);
+      // imageURL.value = imageUrlBlob;
+      // licensePlate.value = license_plate;
       // // Check if it's the image data
       // if (event.data instanceof Blob) {
       //   const licensePlateURL = window.URL.createObjectURL(event.data);

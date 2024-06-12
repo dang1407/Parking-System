@@ -16,6 +16,40 @@ const VehicleStateEnum = {
   Good: 2,
   VeryGood: 3,
 };
+
+const price = {
+  2: {
+    0: {
+      InDayBefore18: 2000,
+      InDayAfter18: 3000,
+      OutDay: 5000,
+    },
+    1: {
+      InDayBefore18: 3000,
+      InDayAfter18: 5000,
+      OutDay: 8000,
+    },
+    2: {
+      Hour: 5000,
+    },
+  },
+  1: {
+    0: {
+      InDayBefore18: 3000,
+      InDayAfter18: 4000,
+      OutDay: 8000,
+    },
+    1: {
+      InDayBefore18: 4000,
+      InDayAfter18: 6000,
+      OutDay: 10000,
+    },
+    2: {
+      Hour: 8000,
+    },
+  },
+};
+
 const parkingVehicleData = ref({});
 const parkingLotData = ref({});
 
@@ -56,6 +90,7 @@ export function GarageController() {
     parkingVehicleData,
     parkingLotData,
     GarageConstancesLanguage,
+    price,
     getParkingVehicleDataAsync,
     getParkingLotDataAsync,
     getVehicleSlotState,

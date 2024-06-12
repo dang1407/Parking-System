@@ -75,6 +75,7 @@ export const SIDEBAR_MENU_ITEMS = {
     {
       icon: "pi pi-fw pi-car",
       to: "/garage",
+      items: [{}],
     },
   ],
   SIDEBAR_LABEL_PARKMEMBER: {

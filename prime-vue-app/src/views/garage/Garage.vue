@@ -51,7 +51,7 @@
                 <img
                   class="-rotate-90 w-[50%]"
                   v-if="item.ParkSlotState == carStateEnum.Reserved"
-                  src="../../assets/imgs/top_view_car_icon.png"
+                  src="../../assets/imgs/preorder.png"
                 />
               </div>
             </div>
@@ -307,17 +307,21 @@
             :licensePlate="licensePlate"
             :licensePlateImageUrl="imageURL"
             @closeForm="toggleParkSlotForm"
-            @updateParkSlotSuccess="getParkSlotData(route.params.parkingId)"
+            @updateParkSlotSuccess="updateParkSlotSuccess"
           ></ParkSlotForm>
         </div>
       </div>
     </div>
+    <Button
+      @click="sendDataToServer('update_parkslot')"
+      label="update"
+    ></Button>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref, computed } from "vue";
-
+import Button from "primevue/button";
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/UserStore.js";
 import { useAxios } from "@/hooks/useAxios";
@@ -410,6 +414,7 @@ async function getParkSlotData(parkingId) {
 }
 
 function toggleParkSlotForm(item) {
+  console.log(item);
   parkingSlotFormData.value = item;
   // console.log(item);
   isShowParkSlotForm.value = !isShowParkSlotForm.value;
@@ -429,6 +434,11 @@ function sendDataToServer(data) {
   }
 }
 
+async function updateParkSlotSuccess() {
+  socket.send("update_parkslot");
+  await getParkSlotData(route.params.parkingId);
+}
+
 onMounted(async () => {
   if (route.params.parkingId) {
     await getParkSlotData(route.params.parkingId);
@@ -437,45 +447,42 @@ onMounted(async () => {
   socket = new WebSocket("ws://localhost:8765");
 
   // Xử lý sự kiện khi nhận dữ liệu từ server
-  socket.addEventListener("message", (event) => {
+  socket.addEventListener("message", async (event) => {
     try {
-      const data = JSON.parse(event.data);
-      const { image_data, license_plate } = data;
-      // if (license_plate) {
-      //   isShowParkSlotFormErrorToast.value = false;
-      // }
-      if (
-        isShowParkSlotForm.value &&
-        !license_plate &&
-        !isShowParkSlotFormErrorToast.value
-      ) {
-        toast.add({
-          severity: "info",
-          summary: "Info",
-          detail: "Message Content",
-          life: 3000,
-        });
-        isShowParkSlotFormErrorToast.value = true;
+      // console.log(event.data);
+      if (event.data == "update_parkslot") {
+        console.log("received update");
+        const respone = await getParkSlotData(route.params.parkingId);
+        console.log(respone);
+      } else {
+        const data = JSON.parse(event.data);
+        const { image_data, license_plate } = data;
+        // if (license_plate) {
+        //   isShowParkSlotFormErrorToast.value = false;
+        // }
+        if (
+          isShowParkSlotForm.value &&
+          !license_plate &&
+          !isShowParkSlotFormErrorToast.value
+        ) {
+          toast.add({
+            severity: "info",
+            summary: "Info",
+            detail: "Message Content",
+            life: 3000,
+          });
+          isShowParkSlotFormErrorToast.value = true;
+        }
+        const binaryData = atob(image_data); // Giải mã chuỗi base64 thành dữ liệu nhị phân
+        const bytes = new Uint8Array(binaryData.length);
+        for (let i = 0; i < binaryData.length; i++) {
+          bytes[i] = binaryData.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: "image/jpeg" }); // Tạo một đối tượng Blob từ dữ liệu nhị phân
+        const imageUrlBlob = URL.createObjectURL(blob);
+        imageURL.value = imageUrlBlob;
+        licensePlate.value = license_plate;
       }
-      const binaryData = atob(image_data); // Giải mã chuỗi base64 thành dữ liệu nhị phân
-      const bytes = new Uint8Array(binaryData.length);
-      for (let i = 0; i < binaryData.length; i++) {
-        bytes[i] = binaryData.charCodeAt(i);
-      }
-      const blob = new Blob([bytes], { type: "image/jpeg" }); // Tạo một đối tượng Blob từ dữ liệu nhị phân
-      const imageUrlBlob = URL.createObjectURL(blob);
-      imageURL.value = imageUrlBlob;
-      licensePlate.value = license_plate;
-      // // Check if it's the image data
-      // if (event.data instanceof Blob) {
-      //   const licensePlateURL = window.URL.createObjectURL(event.data);
-      //   imageURL.value = licensePlateURL;
-      //   return; // Exit after handling image data
-      // } else {
-      //   // Otherwise, it's the license plate
-      //   const licensePlateText = JSON.parse(event.data); // Parse license plate as JSON
-      //   licensePlate.value = licensePlateText;
-      // }
     } catch (error) {
       console.error("Error parsing server message:", error);
     }

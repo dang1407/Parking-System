@@ -2,11 +2,14 @@ export const GarageConstances = {
   vi: {
     accept: "Đồng ý",
     cancel: "Không",
+    price: "Thành tiền",
+    billInfor: "Thông tin hóa đơn",
     takePhotoAgain: "Chụp biển số xe lại",
     updateCustomerLicensePlate: "Sửa biển số xe đã đặt",
+    exportBillButtonLabel: "Xuất hóa đơn",
     update: "Sửa",
     infor: "Thông tin xe có trong bãi đỗ xe",
-
+    outGarageFormHeader: "Thông tin hóa đơn",
     column: "Cột",
     mapTitle: "Bản đồ bãi đỗ xe",
     intervalCallTitle: (time) =>
@@ -29,6 +32,7 @@ export const GarageConstances = {
       ParkSlotCode: "Mã vị trí gửi xe",
       VehicleLabel: "Loại xe",
       VehicleInDateLabel: "Thời gian vào",
+      VehicleOutDateLabel: "Thời gian ra",
       Vehicle: {
         0: "Xe đạp",
         1: "Xe máy",
@@ -43,13 +47,37 @@ export const GarageConstances = {
 
       Order: "Đặt chỗ",
     },
+    toast: {
+      OrderParSlotSuccess: {
+        summary: "Thành công",
+        severity: "success",
+        detail: "Đặt chỗ thành công",
+        life: 10000,
+      },
+      EnterVehicleToGarageSuccess: {
+        summary: "Thành công",
+        severity: "success",
+        detail: "Thêm xe vào bãi thành công",
+        life: 10000,
+      },
+      EnterVehicleOutGarageSuccess: {
+        summary: "Thành công",
+        severity: "success",
+        detail: "Lấy xe ra khỏi bãi thành công",
+        life: 10000,
+      },
+    },
   },
   en: {
     accept: "Accept",
     cancel: "Cancel",
     update: "Update",
+    price: "Price",
     takePhotoAgain: "Take license plate photo again",
     updateCustomerLicensePlate: "Edit the booked license plate",
+
+    billInfor: "Invoice information",
+    exportBillButtonLabel: "Export invoice",
     infor: "Vehicle information available in the parking lot",
     column: "Column",
     mapTitle: "Parking lot map",
@@ -57,7 +85,7 @@ export const GarageConstances = {
       `Parking information is updated every ${time} seconds`,
     emptyParkingLot: "You haven't added any parking lots yet!",
     missingFieldRequired: "You have not entered a required field",
-
+    outGarageFormHeader: "Invoice information",
     state: "State",
     formTitle: "Park slot information",
     formError: {
@@ -75,6 +103,7 @@ export const GarageConstances = {
       LicensePlate: "License plate",
       ParkSlotCode: "Parking location code",
       VehicleLabel: "Vehicle type",
+      VehicleOutDateLabel: "Out time",
       VehicleInDateLabel: "Time in",
       Vehicle: {
         0: "Bicycle",
@@ -88,6 +117,21 @@ export const GarageConstances = {
         2: "Vehicle entered",
       },
       Order: "Reserve",
+    },
+
+    toast: {
+      OrderParSlotSuccess: {
+        summary: "Success",
+        severity: "success",
+        detail: "Reservation parkslot successful",
+        life: 10000,
+      },
+      EnterVehicleToGarageSuccess: {
+        summary: "Success",
+        severity: "success",
+        detail: "Successfully added vehicle to the parking lot",
+        life: 10000,
+      },
     },
   },
 };

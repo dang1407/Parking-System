@@ -7,7 +7,11 @@
           'w-full': !(
             userStore.role == 'admin' || userStore.role == 'employee'
           ),
-          'w-[50%]': userStore.role == 'admin' || userStore.role == 'employee',
+          'w-[50%]':
+            (userStore.role == 'admin' || userStore.role == 'employee') &&
+            parkSlotFormData.Vehicle != 0,
+          'w-full':
+            parkSlotFormData.Vehicle == 0 || userStore.role == 'parkmember',
         }"
       >
         <div class="mt-4">
@@ -61,7 +65,10 @@
             />
             <br />
           </div>
-          <div class="flex flex-col flex-1 gap-1">
+          <div
+            class="flex flex-col flex-1 gap-1"
+            v-if="parkSlotFormData.ParkSlotState != 0"
+          >
             <label class="font-bold">{{
               GarageConstancesLanguage.formLabel.VehicleInDateLabel
             }}</label>
@@ -81,7 +88,10 @@
             parkSlotFormData.ParkSlotState == 0 || userStore.role == 'admin'
           "
         >
-          <div class="flex flex-col flex-1 gap-1">
+          <div
+            class="flex flex-col flex-1 gap-1"
+            v-if="parkSlotFormData.Vehicle != 0"
+          >
             <label class="font-bold" for="employee-full-name"
               >{{ GarageConstancesLanguage.formLabel.LicensePlate }}
               <span class="text-required text-[1.5rem]">*</span>
@@ -103,7 +113,10 @@
           </div>
           <div>
             <Button
-              v-if="parkSlotFormData.ParkSlotState == 0"
+              v-if="
+                parkSlotFormData.ParkSlotState == 0 &&
+                userStore.role == 'parkmember'
+              "
               :label="GarageConstancesLanguage.formLabel.Order"
               @click="orderParkSlot(parkSlotFormData.ParkSlotId)"
             >
@@ -120,12 +133,8 @@
             </Button>
             <Button
               v-if="parkSlotFormData.ParkSlotState == 2"
-              :label="
-                !isUpdateCustomerLicensePlate
-                  ? GarageConstancesLanguage.formLabel.caculateBill
-                  : GarageConstancesLanguage.update
-              "
-              @click="enterVehicleOutGarage(parkSlotFormData.ParkSlotId)"
+              :label="GarageConstancesLanguage.exportBillButtonLabel"
+              @click="showOutGarageBill"
             >
             </Button>
           </div>
@@ -134,7 +143,8 @@
       <div
         v-if="
           (userStore.role == 'admin' || userStore.role == 'employee') &&
-          !isUpdateCustomerLicensePlate
+          !isUpdateCustomerLicensePlate &&
+          parkSlotFormData.Vehicle != 0
         "
         class="p-4"
       >
@@ -168,6 +178,91 @@
         </div>
       </div>
     </div>
+
+    <!-- Vehicle Out Garage Form -->
+    <Dialog
+      @hide="hideOutGarageBill"
+      v-model:visible="isShowOutGarageBill"
+      :header="GarageConstancesLanguage.billInfor"
+      modal
+      :style="{ width: '50rem' }"
+    >
+      <div class="w-full flex">
+        <div class="w-[50%]">
+          <div class="w-full flex flex-col flex-1 gap-1">
+            <label class="font-bold"
+              >{{ GarageConstancesLanguage.formLabel.LicensePlate }}
+            </label>
+            <InputText
+              readonly
+              :invalid="formError?.LicensePlate ? true : false"
+              class="h-[36px]"
+              id="employee-full-name"
+              :value="licensePlate"
+              aria-describedby="employee-full-name-help"
+            />
+            <br />
+          </div>
+          <div class="flex flex-col">
+            <div
+              class="flex flex-col flex-1 gap-1"
+              v-if="parkSlotFormData.ParkSlotState != 0"
+            >
+              <label class="font-bold">{{
+                GarageConstancesLanguage.formLabel.VehicleInDateLabel
+              }}</label>
+              <InputText
+                readonly
+                class="h-[36px]"
+                :value="
+                  convertDateDBToDDMMYYYHHMM(parkSlotFormData.VehicleInDate)
+                "
+                aria-describedby="vehicle-help"
+              />
+              <br />
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <div
+              class="flex flex-col flex-1 gap-1"
+              v-if="parkSlotFormData.ParkSlotState != 0"
+            >
+              <label class="font-bold">{{
+                GarageConstancesLanguage.formLabel.VehicleOutDateLabel
+              }}</label>
+              <InputText
+                readonly
+                class="h-[36px]"
+                :value="convertDateDBToDDMMYYYHHMM(getCurrentTimeString())"
+                aria-describedby="vehicle-help"
+              />
+              <br />
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex flex-col flex-1 gap-1">
+              <label class="font-bold">{{
+                GarageConstancesLanguage.price
+              }}</label>
+              <InputText
+                readonly
+                class="h-[36px]"
+                :value="priceUse"
+                aria-describedby="vehicle-help"
+              />
+              <br />
+            </div>
+          </div>
+          <Button
+            :label="GarageConstancesLanguage.formLabel.enterVehicleOutGarage"
+            @click="enterVehicleOutGarage(parkSlotFormData.ParkSlotId)"
+          ></Button>
+        </div>
+        <div class="flex-1 h-full">
+          <img class="w-full" :src="billUrl" alt="QR thanh toán" />
+        </div>
+      </div>
+    </Dialog>
   </div>
 </template>
 
@@ -175,6 +270,7 @@
 import { ref, computed } from "vue";
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
+import Dialog from "primevue/dialog";
 import { GarageConstances } from "./GarageConstances.js";
 import { useHelperStore } from "@/stores/HelperStore";
 import { useUserStore } from "@/stores/UserStore.js";
@@ -182,13 +278,48 @@ import { useAxios } from "@/hooks/useAxios.js";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import { useConvert } from "@/hooks/useConvert.js";
+
 const confirm = useConfirm();
 const emits = defineEmits(["closeForm", "updateParkSlotSuccess"]);
 const toast = useToast();
-const { convertDateDBToDDMMYYYHHMM } = useConvert();
+const { convertDateDBToDDMMYYYHHMM, getCurrentTimeString } = useConvert();
 console.log(convertDateDBToDDMMYYYHHMM("2024-06-06T23:28:22+07:00"));
 const { request } = useAxios();
-
+const price = {
+  2: {
+    0: {
+      InDayBefore18: 2000,
+      InDayAfter18: 3000,
+      OutDay: 5000,
+    },
+    1: {
+      InDayBefore18: 3000,
+      InDayAfter18: 5000,
+      OutDay: 8000,
+    },
+    2: {
+      Hour: 5000,
+    },
+  },
+  1: {
+    0: {
+      InDayBefore18: 3000,
+      InDayAfter18: 4000,
+      OutDay: 8000,
+    },
+    1: {
+      InDayBefore18: 4000,
+      InDayAfter18: 6000,
+      OutDay: 10000,
+    },
+    2: {
+      Hour: 8000,
+    },
+  },
+};
+const billUrl = ref(
+  `https://api.vietqr.io/image/970407-19036744400010-jsBXndE.jpg?accountName=NGUYEN%20KHANH%20MINH%20DANG&amount=&addInfo=Chuyen%20khoan%20gui%20`
+);
 const userStore = useUserStore();
 const HelperStore = useHelperStore();
 const GarageConstancesLanguage = computed(() => {
@@ -198,9 +329,11 @@ const parkSlotFormData = defineModel("parkSlotFormData");
 const formError = ref({});
 const licensePlate = defineModel("licensePlate");
 const licensePlateImageUrl = defineModel("licensePlateImageUrl");
+const priceUse = ref();
 const isUpdateCustomerLicensePlate = ref(false);
+const isShowOutGarageBill = ref(false);
 async function orderParkSlot(parkSlotId) {
-  if (!parkSlotFormData.value.LicensePlate) {
+  if (parkSlotFormData.Vehicle != 0 && !parkSlotFormData.value.LicensePlate) {
     console.log(GarageConstancesLanguage.value);
     formError.value.LicensePlate =
       GarageConstancesLanguage.value.formError.MissingLicensePlate;
@@ -214,6 +347,7 @@ async function orderParkSlot(parkSlotId) {
   }
   const formData = { ...parkSlotFormData.value };
   formData.ParkSlotState = 1;
+  formData.VehicleInDate = getCurrentTimeString() + "Z";
   console.log(parkSlotFormData.value);
   try {
     const response = await request({
@@ -223,6 +357,7 @@ async function orderParkSlot(parkSlotId) {
     });
     emits("closeForm");
     emits("updateParkSlotSuccess");
+    toast.add(GarageConstancesLanguage.value.toast.OrderParSlotSuccess);
     console.log(response, parkSlotFormData.value);
     isUpdateCustomerLicensePlate.value = false;
   } catch (error) {
@@ -259,7 +394,65 @@ async function enterVehicleToGarage(parkSlotId) {
     }
     const formData = { ...parkSlotFormData.value };
     formData.ParkSlotState = 2;
+    formData.VehicleInDate = getCurrentTimeString();
     console.log(parkSlotFormData.value);
+    const response = await request({
+      url: `ParkSlots/${parkSlotId}`,
+      method: "PUT",
+      data: formData,
+    });
+    emits("closeForm");
+    emits("updateParkSlotSuccess");
+
+    console.log(response, parkSlotFormData.value);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function showOutGarageBill() {
+  isShowOutGarageBill.value = true;
+  const timeNow = getCurrentTimeString();
+  const timeOut = new Date(timeNow);
+  const timeIn = new Date(parkSlotFormData.value.VehicleInDate);
+  const time = timeOut.getTime() - timeIn.getTime();
+  console.log("time in", timeIn);
+  console.log("time out", timeOut);
+  const hours = Math.ceil(time / (60 * 60 * 1000));
+  priceUse.value = caculatePrice(
+    parkSlotFormData.value.VehicleInDate,
+    timeNow,
+    parkSlotFormData.value.Vehicle,
+    2
+  );
+
+  billUrl.value = `https://api.vietqr.io/image/970407-19036744400010-jsBXndE.jpg?accountName=NGUYEN%20KHANH%20MINH%20DANG&amount=${priceUse.value}&addInfo=Chuyen%20khoan%20gui%20`;
+}
+
+function hideOutGarageBill() {
+  isShowOutGarageBill.value = false;
+  billUrl.value = "";
+}
+
+async function enterVehicleOutGarage(parkSlotId) {
+  if (licensePlate.value != parkSlotFormData.value.LicensePlate) {
+    showDialogLicensePlateNotValid();
+    return;
+  }
+  const formData = { ...parkSlotFormData.value };
+  formData.ParkSlotState = 0;
+  formData.LicensePlate = "";
+  const parkingHistoryData = { ...parkSlotFormData.value };
+  parkingHistoryData.VehicleOutDate = getCurrentTimeString() + "Z";
+  parkingHistoryData.Price = priceUse.value;
+  console.log(parkSlotFormData.value);
+  try {
+    const parkingHistory = await request({
+      url: "ParkingHistory",
+      method: "POST",
+      data: parkingHistoryData,
+    });
+
     const response = await request({
       url: `ParkSlots/${parkSlotId}`,
       method: "PUT",
@@ -273,32 +466,37 @@ async function enterVehicleToGarage(parkSlotId) {
   }
 }
 
-async function enterVehicleOutGarage(parkSlotId) {
-  if (licensePlate.value != parkSlotFormData.value.LicensePlate) {
-    showDialogLicensePlateNotValid();
+function caculatePrice(dateString1, dateString2, vehicle, ticketType) {
+  console.log(dateString1, dateString2, vehicle, ticketType);
+  if (!dateString2) {
     return;
   }
-  const formData = { ...parkSlotFormData.value };
-  formData.ParkSlotState = 0;
-  formData.LicensePlate = "";
-  console.log(parkSlotFormData.value);
-  try {
-    const parkingHistory = await request({
-      url: "ParkingHistory",
-      method: "POST",
-      data: "",
-    });
+  const dateObject1 = new Date(dateString1);
+  const dateObject2 = new Date(dateString2);
+  if (dateObject1 >= dateObject2) {
+    console.log(
+      "Thời điểm xe vào không thể trùng hoặc lớn hơn thời điểm xe ra. Vui lòng kiểm tra lại cách truyền tham số."
+    );
+  }
 
-    const response = await request({
-      url: `ParkSlots/${parkSlotId}`,
-      method: "PUT",
-      data: formData,
-    });
-    emits("closeForm");
-    emits("updateParkSlotSuccess");
-    console.log(response, parkSlotFormData.value);
-  } catch (error) {
-    console.log(error);
+  const date1 = dateObject1.getDate();
+  const date2 = dateObject2.getDate();
+  // Tính giá tiền cho ô tô
+  if (vehicle == 2) {
+    const time = dateObject2.getTime() - dateObject1.getTime();
+    const hours = Math.ceil(time / (60 * 60 * 1000));
+    return price[ticketType][2].Hour * hours;
+    // console.log(hours);
+  } else {
+    if (date2 > date1) {
+      return price[ticketType][vehicle].OutDay * (date2 - date1);
+    } else {
+      if (dateObject2.getHours() <= 17) {
+        return price[ticketType][vehicle].InDayBefore18;
+      } else if (dateObject2.getHours() >= 18 && dateObject2.getHours() <= 23) {
+        return price[ticketType][vehicle].InDayAfter18;
+      }
+    }
   }
 }
 </script>

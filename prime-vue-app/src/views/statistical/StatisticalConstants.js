@@ -29,6 +29,7 @@ export const StatisticalConstances = {
         label: "Tất cả",
       },
     ],
+    monthlyRevenue: "Doanh thu tháng",
   },
   en: {
     title: "Thống kê doanh thu",
@@ -60,5 +61,6 @@ export const StatisticalConstances = {
         label: "All",
       },
     ],
+    monthlyRevenue: "Monthly Revenue",
   },
 };

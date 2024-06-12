@@ -46,7 +46,7 @@ namespace WebAPI.Controllers
             });
         }
 
-        [Authorize(Roles = "admin, employee")]
+        [Authorize]
         public override async Task<IActionResult> GetFilterAsync(int page, int pageSize, string? searchProperty)
         {
             Guid companyId = Guid.Parse(HttpContext.User.FindFirstValue("CompanyId"));

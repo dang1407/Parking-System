@@ -17,6 +17,7 @@ namespace WebAPI.Application
         public DateTimeOffset? VehicleOutDate { get; set; }
         public DateTimeOffset? VehicleInDate { get; set; }
         public int Vehicle { get; set; } = -1;
+        public Guid ParkingId { get; set; } 
 
     }
 }
