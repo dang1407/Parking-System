@@ -17,31 +17,47 @@ const parkingHistoryPaging = ref({
   },
 });
 
-const vehicleOptionEnums = [
+const topYearParkMember = ref();
+const topMonthParkMember = ref();
+
+const yearsSearch = ref(parseInt(new Date().getFullYear()));
+const yearSearchVModel = ref([
   {
+    value: yearsSearch.value,
+  },
+]);
+const yearOptions = ref([]);
+const vehicleOptionValues = [
+  {
+    // xe đạp
     value: 0,
   },
   {
+    // Xe máy
     value: 1,
   },
   {
+    // Ô tô
     value: 2,
   },
   {
+    // Tất cả
     value: 3,
   },
 ];
 
 const vehicleOptions = computed(() => {
   return mergeWith(
-    vehicleOptionEnums,
+    vehicleOptionValues,
     StatisticalConstancesLanguage.value.vehicleOptions
   );
 });
+const vehicleOptionsSelected = ref(vehicleOptions.value[3]);
+
 async function getParkingHistoryStatisticalAsync(year, vehicle) {
   try {
     let requestUrl = `ParkingHistory/statistical?year=${year}`;
-    if (vehicle) {
+    if (0 <= vehicle && vehicle <= 2) {
       requestUrl += `&vehicle=${vehicle}`;
     }
     const response = await request({
@@ -54,13 +70,65 @@ async function getParkingHistoryStatisticalAsync(year, vehicle) {
   }
 }
 
+async function getCompanyInfor(toast) {
+  try {
+    const response = await request({
+      url: "Companys/infor",
+      method: "GET",
+    });
+    const startYear = new Date(response?.CreatedDate).getFullYear();
+    const nowYear = new Date().getFullYear();
+    yearOptions.value = [];
+    for (let i = startYear; i <= nowYear; i++) {
+      yearOptions.value.push({
+        value: i,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function getTopParkMemberAsync(limit, year, month) {
+  try {
+    if (!limit) {
+      console.log("truyền thiếu tham số limit");
+      return;
+    }
+    let URL = `ParkMembers/TopParkMember?limit=${limit}`;
+    if (year) {
+      URL += `&year=${year}`;
+    }
+    if (month) {
+      URL += `&month=${month}`;
+    }
+    console.log(year, month);
+    const response = await request({
+      url: URL,
+      method: "GET",
+    });
+    console.log(response);
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export function StatisticalService() {
   return {
     vehicleOptions,
+    vehicleOptionsSelected,
     parkingHistoryData,
     StatisticalConstances,
     parkingHistoryPaging,
     StatisticalConstancesLanguage,
+    yearSearchVModel,
+    yearsSearch,
+    yearOptions,
+    topMonthParkMember,
+    topYearParkMember,
+    getCompanyInfor,
     getParkingHistoryStatisticalAsync,
+    getTopParkMemberAsync,
   };
 }

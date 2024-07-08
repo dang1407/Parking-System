@@ -9,7 +9,7 @@ using WebAPI.Domain;
 
 namespace WebAPI.Application
 {
-    public class UserService : BaseCompanyService<Account, AccountDTO, RegisterDTO, ForgotPasswordDTO>, IUserService
+    public class UserService : BaseCompanyService<Account, AccountDTO, AccountCreateDTO, AccountUpdateDTO>, IUserService
     {
         private readonly IUserRepository _userRepository;   
         public UserService(IUserRepository userRepository, IMapper mapper) : base(userRepository, mapper)
@@ -17,7 +17,7 @@ namespace WebAPI.Application
             _userRepository = userRepository;
         }
 
-        public async Task ForgotPassWordAsync(ForgotPasswordDTO forgotPasswordDTO)
+        public async Task ForgotPassWordAsync(AccountUpdateDTO forgotPasswordDTO)
         {
             //var user = MapUpdateDTOToEntity(forgotPasswordDTO);
             //var result = await _userRepository.UpdateAsync(user);
@@ -25,10 +25,15 @@ namespace WebAPI.Application
             throw new NotImplementedException();    
         }
 
-        public async Task<int> RegisterAsync(RegisterDTO registerDTO, Guid companyId)
+        public async Task<int> RegisterAsync(AccountCreateDTO registerDTO, Guid companyId)
         {
             var user = MapCreateDTOToEntity(registerDTO);
             user.CompanyId = companyId;
+            var existResult = await _userRepository.FindAccountAsync(registerDTO.UserName);
+            if (existResult != null) 
+            {
+                throw new ConflictException("User đã tồn tại trong hệ thống");
+            }
             var result = await _userRepository.RegisterAsync(user);
             return result;
         }
@@ -38,6 +43,12 @@ namespace WebAPI.Application
             var findAccount = await _userRepository.FindAccountAsync(loginDTO.UserName);
 
             return MapEntityToDTO(findAccount);
+        }
+
+        public async Task<dynamic> GetUserInforAsync(Guid accountId, string role)
+        {
+            var result = await _userRepository.GetUserInfor(accountId, role);
+            return result;
         }
     }
 }
